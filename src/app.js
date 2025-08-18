@@ -6,7 +6,8 @@ import {
 	DynamicScheme,
 	Variant,
 	SpecVersion,
-	MaterialDynamicColors
+	MaterialDynamicColors,
+	TonalPalette
 } from '@materialx/material-color-utilities';
 
 /**
@@ -108,13 +109,14 @@ class MaterialColorGenerator {
 			}
 
 			// Extract custom colours (if any)
-			const customColors = {};
-			this.colorRoles.forEach(role => {
-				const colorParam = params.get(`color_${role}`);
-				if (colorParam) {
-					customColors[role] = colorParam;
-				}
-			});
+		const customColors = {};
+		this.colorRoles.forEach(role => {
+			const colorParam = params.get(`color_${role}`);
+			if (colorParam) {
+				customColors[role] = colorParam;
+				console.log(`Found custom ${role} color:`, colorParam);
+			}
+		});
 
 			// Convert hex colours (remove alpha channel if present)
 			const processedColors = {};
@@ -269,7 +271,9 @@ class MaterialColorGenerator {
 			schemeOptions.primaryPaletteKeyColor = Hct.fromInt(argbFromHex(customColors.primary));
 		}
 		if (customColors.secondary) {
+			console.log('Adding custom secondary color to scheme:', customColors.secondary);
 			schemeOptions.secondaryPaletteKeyColor = Hct.fromInt(argbFromHex(customColors.secondary));
+			console.log('Secondary palette key color HCT:', schemeOptions.secondaryPaletteKeyColor.hue, schemeOptions.secondaryPaletteKeyColor.chroma, schemeOptions.secondaryPaletteKeyColor.tone);
 		}
 		if (customColors.tertiary) {
 			schemeOptions.tertiaryPaletteKeyColor = Hct.fromInt(argbFromHex(customColors.tertiary));
@@ -294,9 +298,45 @@ class MaterialColorGenerator {
 			'error': scheme.errorPalette
 		};
 
+		// WORKAROUND: DynamicScheme ignores custom palette key colors in @materialx/material-color-utilities v0.4.5
+		// Create custom TonalPalettes directly for custom colors
+		// Note: Remove alpha channel from hex colors before processing
+		if (customColors.primary) {
+			const primaryHex = customColors.primary.length > 7 ? customColors.primary.slice(0, 7) : customColors.primary;
+			paletteMapping['primary'] = TonalPalette.fromHct(Hct.fromInt(argbFromHex(primaryHex)));
+		}
+		if (customColors.secondary) {
+			const secondaryHex = customColors.secondary.length > 7 ? customColors.secondary.slice(0, 7) : customColors.secondary;
+			paletteMapping['secondary'] = TonalPalette.fromHct(Hct.fromInt(argbFromHex(secondaryHex)));
+			console.log('Applied custom secondary palette (без альфа):', hexFromArgb(paletteMapping['secondary'].keyColor.toInt()));
+		}
+		if (customColors.tertiary) {
+			const tertiaryHex = customColors.tertiary.length > 7 ? customColors.tertiary.slice(0, 7) : customColors.tertiary;
+			paletteMapping['tertiary'] = TonalPalette.fromHct(Hct.fromInt(argbFromHex(tertiaryHex)));
+		}
+		if (customColors.neutral) {
+			const neutralHex = customColors.neutral.length > 7 ? customColors.neutral.slice(0, 7) : customColors.neutral;
+			paletteMapping['neutral'] = TonalPalette.fromHct(Hct.fromInt(argbFromHex(neutralHex)));
+		}
+		if (customColors.neutralVariant) {
+			const neutralVariantHex = customColors.neutralVariant.length > 7 ? customColors.neutralVariant.slice(0, 7) : customColors.neutralVariant;
+			paletteMapping['neutralVariant'] = TonalPalette.fromHct(Hct.fromInt(argbFromHex(neutralVariantHex)));
+		}
+		if (customColors.error) {
+			const errorHex = customColors.error.length > 7 ? customColors.error.slice(0, 7) : customColors.error;
+			paletteMapping['error'] = TonalPalette.fromHct(Hct.fromInt(argbFromHex(errorHex)));
+			console.log('Applied custom error palette:', hexFromArgb(paletteMapping['error'].keyColor.toInt()));
+		}
+
 		// Create palettes for each role
 		this.colorRoles.forEach(role => {
 			const tonalPalette = paletteMapping[role] || paletteMapping['primary'];
+
+			// Debug: check secondary palette
+			if (role === 'secondary' && customColors.secondary) {
+				console.log('Secondary tonal palette key color:', hexFromArgb(tonalPalette.keyColor.toInt()));
+				console.log('Secondary tone 60:', hexFromArgb(tonalPalette.tone(60)));
+			}
 
 			// Generate tones
 			const tones = {};
