@@ -114,7 +114,6 @@ class MaterialColorGenerator {
 			const colorParam = params.get(`color_${role}`);
 			if (colorParam) {
 				customColors[role] = colorParam;
-				console.log(`Found custom ${role} color:`, colorParam);
 			}
 		});
 
@@ -271,9 +270,7 @@ class MaterialColorGenerator {
 			schemeOptions.primaryPaletteKeyColor = Hct.fromInt(argbFromHex(customColors.primary));
 		}
 		if (customColors.secondary) {
-			console.log('Adding custom secondary color to scheme:', customColors.secondary);
 			schemeOptions.secondaryPaletteKeyColor = Hct.fromInt(argbFromHex(customColors.secondary));
-			console.log('Secondary palette key color HCT:', schemeOptions.secondaryPaletteKeyColor.hue, schemeOptions.secondaryPaletteKeyColor.chroma, schemeOptions.secondaryPaletteKeyColor.tone);
 		}
 		if (customColors.tertiary) {
 			schemeOptions.tertiaryPaletteKeyColor = Hct.fromInt(argbFromHex(customColors.tertiary));
@@ -308,7 +305,6 @@ class MaterialColorGenerator {
 		if (customColors.secondary) {
 			const secondaryHex = customColors.secondary.length > 7 ? customColors.secondary.slice(0, 7) : customColors.secondary;
 			paletteMapping['secondary'] = TonalPalette.fromHct(Hct.fromInt(argbFromHex(secondaryHex)));
-			console.log('Applied custom secondary palette (без альфа):', hexFromArgb(paletteMapping['secondary'].keyColor.toInt()));
 		}
 		if (customColors.tertiary) {
 			const tertiaryHex = customColors.tertiary.length > 7 ? customColors.tertiary.slice(0, 7) : customColors.tertiary;
@@ -325,18 +321,11 @@ class MaterialColorGenerator {
 		if (customColors.error) {
 			const errorHex = customColors.error.length > 7 ? customColors.error.slice(0, 7) : customColors.error;
 			paletteMapping['error'] = TonalPalette.fromHct(Hct.fromInt(argbFromHex(errorHex)));
-			console.log('Applied custom error palette:', hexFromArgb(paletteMapping['error'].keyColor.toInt()));
 		}
 
 		// Create palettes for each role
 		this.colorRoles.forEach(role => {
 			const tonalPalette = paletteMapping[role] || paletteMapping['primary'];
-
-			// Debug: check secondary palette
-			if (role === 'secondary' && customColors.secondary) {
-				console.log('Secondary tonal palette key color:', hexFromArgb(tonalPalette.keyColor.toInt()));
-				console.log('Secondary tone 60:', hexFromArgb(tonalPalette.tone(60)));
-			}
 
 			// Generate tones
 			const tones = {};
@@ -434,41 +423,23 @@ class MaterialColorGenerator {
 	 * Handle generation
 	 */
 	async handleGenerate() {
-		try {
-			const url = this.urlInput?.value.trim();
-			if (!url) {
-				throw new Error('Введите URL из MaterialKolor.com');
-			}
-
-			if (this.generateBtn) {
-				this.generateBtn.disabled = true;
-				this.generateBtn.textContent = 'Генерирую...';
-			}
-
-			// Parsing the URL
-			const parsedData = this.parseUrl(url);
-
-			// Generate a schema
-			const result = await this.generateColorScheme(parsedData);
-
-			// Display the result
-			this.displayResult(result);
-
-			// Activate buttons
-			if (this.downloadBtn) this.downloadBtn.disabled = false;
-			if (this.copyBtn) this.copyBtn.disabled = false;
-
-			this.showStatus('Палитра успешно сгенерирована!', 'success');
-
-		} catch (error) {
-			this.showStatus(error.message, 'error');
-			console.error('Generation error:', error);
-		} finally {
-			if (this.generateBtn) {
-				this.generateBtn.disabled = false;
-				this.generateBtn.textContent = 'Генерировать JSON';
-			}
+		const url = this.urlInput?.value.trim();
+		if (!url) {
+			return;
 		}
+
+		// Parsing the URL
+		const parsedData = this.parseUrl(url);
+
+		// Generate a schema
+		const result = await this.generateColorScheme(parsedData);
+
+		// Display the result
+		this.displayResult(result);
+
+		// Activate buttons
+		if (this.downloadBtn) this.downloadBtn.disabled = false;
+		if (this.copyBtn) this.copyBtn.disabled = false;
 	}
 
 	/**
@@ -501,7 +472,6 @@ class MaterialColorGenerator {
 		document.body.removeChild(a);
 
 		URL.revokeObjectURL(url);
-		this.showStatus('Файл загружен!', 'success');
 	}
 
 	/**
@@ -512,10 +482,8 @@ class MaterialColorGenerator {
 
 		try {
 			const jsonString = JSON.stringify(this.generatedResult, null, 2);
-			await navigator.clipboard.writeText(jsonString);
-			this.showStatus('JSON скопирован в буфер обмена!', 'success');
+			await navigator.clipboard.writeText(jsonString);;
 		} catch (error) {
-			this.showStatus('Ошибка копирования', 'error');
 		}
 	}
 
@@ -528,32 +496,7 @@ class MaterialColorGenerator {
 		if (this.downloadBtn) this.downloadBtn.disabled = true;
 		if (this.copyBtn) this.copyBtn.disabled = true;
 		if (this.generateBtn) this.generateBtn.disabled = true;
-
 		this.generatedResult = null;
-		this.showStatus('Поля очищены', 'info');
-	}
-
-	/**
-	 * Show status
-	 */
-	showStatus(message, type = 'info') {
-		// I can add a status element in HTML and update it here
-		console.log(`[${type.toUpperCase()}] ${message}`);
-
-		// If there is a status element in the DOM
-		const statusElement = document.querySelector('.status-message');
-		if (statusElement) {
-			statusElement.textContent = message;
-			statusElement.className = `status-message status-${type}`;
-
-			// Automatically hide after 3 seconds for success
-			if (type === 'success') {
-				setTimeout(() => {
-					statusElement.textContent = '';
-					statusElement.className = 'status-message';
-				}, 3000);
-			}
-		}
 	}
 }
 
