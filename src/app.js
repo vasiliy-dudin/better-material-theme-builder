@@ -16,15 +16,15 @@ class MaterialColorGenerator {
 	constructor() {
 		// Mapping of scheme names to numbers
 		this.styleMapping = {
-			'MONOCHROME': Variant.MONOCHROME || 0,
-			'NEUTRAL': Variant.NEUTRAL || 1,
-			'TONAL_SPOT': Variant.TONAL_SPOT || 2,
-			'VIBRANT': Variant.VIBRANT || 3,
-			'EXPRESSIVE': Variant.EXPRESSIVE || 4,
-			'FIDELITY': Variant.FIDELITY || 5,
-			'CONTENT': Variant.CONTENT || 6,
-			'RAINBOW': Variant.RAINBOW || 7,
-			'FRUIT_SALAD': Variant.FRUIT_SALAD || 8
+			'MONOCHROME': Variant.MONOCHROME,
+			'NEUTRAL': Variant.NEUTRAL,
+			'TONAL_SPOT': Variant.TONAL_SPOT,
+			'VIBRANT': Variant.VIBRANT,
+			'EXPRESSIVE': Variant.EXPRESSIVE,
+			'FIDELITY': Variant.FIDELITY,
+			'CONTENT': Variant.CONTENT,
+			'RAINBOW': Variant.RAINBOW,
+			'FRUIT_SALAD': Variant.FRUIT_SALAD
 		};
 
 		// Tonal values for palettes
@@ -162,7 +162,7 @@ class MaterialColorGenerator {
 			const specVersion = colorSpec === 'SPEC_2025' ? SpecVersion.SPEC_2025 : SpecVersion.SPEC_2021;
 
 			// Determine style/variant
-			const variant = this.styleMapping[style] || Variant.TONAL_SPOT;
+		const variant = this.styleMapping.hasOwnProperty(style) ? this.styleMapping[style] : Variant.TONAL_SPOT;
 
 			// Create base theme from seed colour
 			const baseTheme = themeFromSourceColor(seedArgb, [], { specVersion });
