@@ -5,10 +5,14 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "vite build",
-		"preview": "vite preview"
+		"preview": "vite preview",
+		"deploy": "npm run build && echo. > dist/.nojekyll && gh-pages -d dist"
 	},
 	"dependencies": {
 		"@materialx/material-color-utilities": "^0.4.5",
 		"vite": "^7.1.2"
+	},
+	"devDependencies": {
+		"gh-pages": "^6.3.0"
 	}
 }
