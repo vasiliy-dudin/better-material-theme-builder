@@ -222,25 +222,11 @@ class MaterialColorGenerator {
 
 			// Form result
 			const result = {
-				description: `Material 3 colour scheme generated from seed ${seedColor}`,
-				parameters: {
-					seed: seedColor,
-					style: style,
-					spec: colorSpec,
-					customColors: customColors,
-					originalUrl: parsedData.originalUrl
-				},
-				roleColors: roleColors,
 				schemes: {
 					light: lightColors,
 					dark: darkColors
 				},
-				palettes: palettes,
-				metadata: {
-					generated: new Date().toISOString(),
-					version: '1.0',
-					library: '@material/material-color-utilities'
-				}
+				palettes: palettes
 			};
 
 			return result;
