@@ -411,9 +411,7 @@ class MaterialColorGenerator {
 		colors.surfaceContainerHighest = hexFromArgb(MaterialDynamicColors.surfaceContainerHighest.getArgb(scheme));
 		colors.surfaceTint = hexFromArgb(MaterialDynamicColors.surfaceTint.getArgb(scheme));
 
-		// Background colors (deprecated but still included)
-		colors.background = hexFromArgb(MaterialDynamicColors.background.getArgb(scheme));
-		colors.onBackground = hexFromArgb(MaterialDynamicColors.onBackground.getArgb(scheme));
+
 
 		// Outline colors
 		colors.outline = hexFromArgb(MaterialDynamicColors.outline.getArgb(scheme));
