@@ -14,6 +14,7 @@
 			border: 1px solid #dee2e6;
 			border-radius: 0.375rem;
 			padding: 1rem;
+			margin: 1rem 0;
 			font-family: 'Courier New', monospace;
 			font-size: 0.875rem;
 			white-space: pre-wrap;
@@ -27,6 +28,11 @@
 			border-radius: 0.25rem;
 			display: block;
 			word-break: break-all;
+		}
+		.panel-disabled {
+			opacity: 0.3;
+			filter: grayscale(1);
+			pointer-events: none;
 		}
 	</style>
 </head>
@@ -68,34 +74,45 @@
 				<div class="col-lg-6">
 					<div class="card h-100 shadow-sm">
 						<div class="card-body">
-							<h3 class="card-title mb-3">Result</h3>
-							<div class="form-check form-switch mb-3">
-								<input class="form-check-input" type="checkbox" id="stateLayersToggle" checked>
-								<label class="form-check-label" for="stateLayersToggle">
-									State Layers
-								</label>
+							<div class="d-flex justify-content-between align-items-center mb-3">
+				<h3 class="card-title mb-0">Result</h3>
+				<div class="d-flex gap-2">
+					<button id="copyBtn" class="btn btn-secondary btn-sm" disabled>
+						Copy
+					</button>
+					<button id="downloadBtn" class="btn btn-secondary btn-sm" disabled>
+						Download JSON
+					</button>
+				</div>
+			</div>
+					<h5 class="mb-3">Options</h5>
+					<div class="form-check form-switch mb-3">
+						<input class="form-check-input" type="checkbox" id="stateLayersToggle" checked>
+						<label class="form-check-label" for="stateLayersToggle">
+							State Layers
+						</label>
+					</div>
+					<div class="form-check form-switch mb-3">
+						<input class="form-check-input" type="checkbox" id="tonalPalettesToggle" checked>
+						<label class="form-check-label" for="tonalPalettesToggle">
+							Tonal Palettes
+						</label>
+					</div>
+					<label for="namingFormat" class="form-label">Naming Format</label>
+					<select id="namingFormat" class="form-select mb-3">
+						<option value="camelCase">Camel Case (primaryContainer)</option>
+						<option value="kebab-case">Kebab Case (primary-container)</option>
+						<option value="Title Case">Title Case (Primary Container)</option>
+					</select>
+							<h5 class="mb-3">Extended Colors</h5>
+							<div id="extendedColorsContainer" class="mb-3">
+								<!-- Dynamic color inputs will be added here -->
 							</div>
-							<div class="form-check form-switch mb-3">
-								<input class="form-check-input" type="checkbox" id="tonalPalettesToggle" checked>
-								<label class="form-check-label" for="tonalPalettesToggle">
-									Tonal Palettes
-								</label>
-							</div>
-							<label for="namingFormat" class="form-label">Naming Format</label>
-							<select id="namingFormat" class="form-select mb-3">
-								<option value="camelCase">Camel Case (primaryContainer)</option>
-								<option value="kebab-case">Kebab Case (primary-container)</option>
-								<option value="Title Case">Title Case (Primary Container)</option>
-							</select>
-							<div class="d-flex flex-wrap gap-2 mb-3">
-								<button id="downloadBtn" class="btn btn-secondary" disabled>
-									Download JSON
-								</button>
-								<button id="copyBtn" class="btn btn-secondary" disabled>
-									Copy
-								</button>
-							</div>
+							<button id="addColorBtn" class="btn btn-outline-primary btn-sm mb-3">
+								Add a color
+							</button>
 							<pre id="jsonOutput" class="json-output"></pre>
+						</div>
 						</div>
 					</div>
 				</div>

@@ -51,12 +51,21 @@ class MaterialColorGenerator {
 		this.namingFormatSelect = document.getElementById('namingFormat');
 		this.stateLayersToggle = document.getElementById('stateLayersToggle');
 		this.tonalPalettesToggle = document.getElementById('tonalPalettesToggle');
+		this.addColorBtn = document.getElementById('addColorBtn');
+		this.extendedColorsContainer = document.getElementById('extendedColorsContainer');
 		
 		// Store original result for format conversion
 		this.originalResult = null;
+		
+		// Extended colors array
+		this.extendedColors = [];
+		this.extendedColorCounter = 0;
 
 		// Bind events
 		this.bindEvents();
+		
+		// Initialize panel state
+		this.updatePanelState();
 	}
 
 	/**
@@ -120,6 +129,129 @@ class MaterialColorGenerator {
 					this.updateResultFormat();
 				}
 			});
+		}
+
+		// Handle add color button
+		if (this.addColorBtn) {
+			this.addColorBtn.addEventListener('click', () => this.addExtendedColor());
+		}
+	}
+
+	/**
+	 * Add a new extended color input
+	 */
+	addExtendedColor() {
+		// Calculate the next color number based on existing colors
+		const existingColors = this.extendedColorsContainer.querySelectorAll('input[type="color"]');
+		const nextColorNumber = existingColors.length + 1;
+		this.extendedColorCounter = Math.max(this.extendedColorCounter, nextColorNumber);
+		const colorId = `extendedColor${this.extendedColorCounter}`;
+		const colorName = `Custom color ${nextColorNumber}`;
+		
+		const colorDiv = document.createElement('div');
+		colorDiv.className = 'input-group mb-2';
+		colorDiv.id = `${colorId}Container`;
+		
+		colorDiv.innerHTML = `
+			<input type="color" class="form-control form-control-color" id="${colorId}" value="#ff5722" style="max-width: 80px;">
+			<input type="text" class="form-control" placeholder="HEX code" id="${colorId}Hex" value="#ff5722" maxlength="7" style="max-width: 120px;">
+			<input type="text" class="form-control" placeholder="Color name" id="${colorId}Name" value="${colorName}">
+			<button class="btn btn-outline-danger" type="button" data-color-id="${colorId}">
+				×
+			</button>
+		`;
+		
+		this.extendedColorsContainer.appendChild(colorDiv);
+		
+		// Add event listeners for real-time updates
+		const colorInput = document.getElementById(colorId);
+		const hexInput = document.getElementById(`${colorId}Hex`);
+		const nameInput = document.getElementById(`${colorId}Name`);
+		const removeBtn = colorDiv.querySelector('button[data-color-id]');
+		
+		// Sync color picker with hex input
+		colorInput.addEventListener('input', () => {
+			hexInput.value = colorInput.value;
+			this.regenerateWithExtendedColors();
+		});
+		
+		// Sync hex input with color picker
+		hexInput.addEventListener('input', () => {
+			if (this.isValidHex(hexInput.value)) {
+				colorInput.value = hexInput.value;
+				this.regenerateWithExtendedColors();
+			}
+		});
+		
+		nameInput.addEventListener('input', () => this.regenerateWithExtendedColors());
+		removeBtn.addEventListener('click', () => this.removeExtendedColor(colorId));
+		
+		// Update extended colors array and result
+		this.regenerateWithExtendedColors();
+	}
+
+	/**
+	 * Remove an extended color input
+	 * @param {string} colorId - ID of the color to remove
+	 */
+	removeExtendedColor(colorId) {
+		const container = document.getElementById(`${colorId}Container`);
+		if (container) {
+			container.remove();
+			this.regenerateWithExtendedColors();
+		}
+	}
+
+	/**
+	 * Update extended colors array
+	 */
+	updateExtendedColors() {
+		this.extendedColors = [];
+		
+		const colorInputs = this.extendedColorsContainer.querySelectorAll('input[type="color"]');
+		colorInputs.forEach(input => {
+			const hexInput = document.getElementById(`${input.id}Hex`);
+			const nameInput = document.getElementById(`${input.id}Name`);
+			if (nameInput && hexInput) {
+				const colorName = nameInput.value.trim() || nameInput.placeholder || 'Custom color';
+				const colorValue = hexInput.value.trim() || input.value;
+				this.extendedColors.push({
+					name: colorName,
+					color: colorValue
+				});
+			}
+		});
+	}
+
+	/**
+	 * Update panel state based on JSON result availability
+	 */
+	updatePanelState() {
+		const hasResult = this.originalResult !== null;
+		
+		// Get the entire right panel
+		const rightPanel = document.querySelector('.col-lg-6:last-child .card-body');
+		const downloadBtn = this.downloadBtn;
+		const copyBtn = this.copyBtn;
+		
+		if (!hasResult) {
+			// Add disabled class to right panel
+			if (rightPanel) {
+				rightPanel.classList.add('panel-disabled');
+			}
+			
+			// Disable buttons
+			if (downloadBtn) downloadBtn.disabled = true;
+			if (copyBtn) copyBtn.disabled = true;
+		} else {
+			// Remove disabled class from right panel
+			if (rightPanel) {
+				rightPanel.classList.remove('panel-disabled');
+			}
+			
+			// Enable buttons when result is available
+			if (downloadBtn) downloadBtn.disabled = false;
+			if (copyBtn) copyBtn.disabled = false;
 		}
 	}
 
@@ -256,6 +388,47 @@ class MaterialColorGenerator {
 				neutralVariant: this.generateRoleColor(seedArgb, 'neutralVariant', variant),
 				error: this.generateRoleColor(seedArgb, 'error', variant)
 			};
+
+			// Add extended colors to palettes and schemes if any
+			if (this.extendedColors && this.extendedColors.length > 0) {
+				this.extendedColors.forEach((colorData) => {
+					// Use sanitized color name to preserve hyphens, formatting will be applied later in transformKeys
+					const colorName = this.sanitizeColorName(colorData.name);
+					const extendedArgb = argbFromHex(colorData.color);
+					const extendedHct = Hct.fromInt(extendedArgb);
+					
+					// Create tonal palette for the extended color
+					const tonalPalette = TonalPalette.fromHct(extendedHct);
+					
+					// Add tonal palette to palettes (same format as default palettes)
+					const tones = {};
+					this.tones.forEach(tone => {
+						tones[tone.toString()] = hexFromArgb(tonalPalette.tone(tone));
+					});
+					palettes[colorName] = tones;
+					
+					// Add color roles to schemes (same format as default roles)
+					// Light theme roles
+					lightColors[colorName] = hexFromArgb(tonalPalette.tone(40));
+					lightColors[`on${colorName.charAt(0).toUpperCase() + colorName.slice(1)}`] = hexFromArgb(tonalPalette.tone(100));
+					lightColors[`${colorName}Container`] = hexFromArgb(tonalPalette.tone(90));
+					lightColors[`on${colorName.charAt(0).toUpperCase() + colorName.slice(1)}Container`] = hexFromArgb(tonalPalette.tone(10));
+					lightColors[`${colorName}Fixed`] = hexFromArgb(tonalPalette.tone(90));
+					lightColors[`${colorName}FixedDim`] = hexFromArgb(tonalPalette.tone(80));
+					lightColors[`on${colorName.charAt(0).toUpperCase() + colorName.slice(1)}Fixed`] = hexFromArgb(tonalPalette.tone(10));
+					lightColors[`on${colorName.charAt(0).toUpperCase() + colorName.slice(1)}FixedVariant`] = hexFromArgb(tonalPalette.tone(30));
+					
+					// Dark theme roles
+					darkColors[colorName] = hexFromArgb(tonalPalette.tone(80));
+					darkColors[`on${colorName.charAt(0).toUpperCase() + colorName.slice(1)}`] = hexFromArgb(tonalPalette.tone(20));
+					darkColors[`${colorName}Container`] = hexFromArgb(tonalPalette.tone(30));
+					darkColors[`on${colorName.charAt(0).toUpperCase() + colorName.slice(1)}Container`] = hexFromArgb(tonalPalette.tone(90));
+					darkColors[`${colorName}Fixed`] = hexFromArgb(tonalPalette.tone(90));
+					darkColors[`${colorName}FixedDim`] = hexFromArgb(tonalPalette.tone(80));
+					darkColors[`on${colorName.charAt(0).toUpperCase() + colorName.slice(1)}Fixed`] = hexFromArgb(tonalPalette.tone(10));
+					darkColors[`on${colorName.charAt(0).toUpperCase() + colorName.slice(1)}FixedVariant`] = hexFromArgb(tonalPalette.tone(30));
+				});
+			}
 
 			// Form result
 			const result = {
@@ -551,21 +724,72 @@ class MaterialColorGenerator {
 	}
 
 	/**
+	 * Validate hex color code
+	 * @param {string} hex - Hex color string
+	 * @returns {boolean} True if valid hex color
+	 */
+	isValidHex(hex) {
+		return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(hex);
+	}
+
+	/**
 	 * Convert camelCase to kebab-case
 	 * @param {string} str - String in camelCase
 	 * @returns {string} String in kebab-case
 	 */
 	camelToKebab(str) {
+		// If string contains spaces, convert them to hyphens
+		if (str.includes(' ')) {
+			return str.toLowerCase().replace(/\s+/g, '-');
+		}
+		// If string already contains hyphens, keep them; otherwise convert camelCase
+		if (str.includes('-')) {
+			return str.toLowerCase();
+		}
 		return str.replace(/([A-Z])/g, '-$1').toLowerCase();
 	}
 
 	/**
 	 * Convert camelCase to Title Case
-	 * @param {string} str - String in camelCase
+	 * @param {string} str - String in camelCase, with hyphens, or with spaces
 	 * @returns {string} String in Title Case
 	 */
 	camelToTitle(str) {
+		// If string contains spaces, capitalize each word
+		if (str.includes(' ')) {
+			return str.split(' ').map(word => 
+				word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+			).join(' ');
+		}
+		// If string contains hyphens, convert them to spaces and capitalize
+		if (str.includes('-')) {
+			return str.split('-').map(word => 
+				word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+			).join(' ');
+		}
+		// Handle camelCase
 		return str.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+	}
+
+	/**
+	 * Convert string to camelCase
+	 */
+	toCamelCase(str) {
+		return str
+			.toLowerCase()
+			.replace(/[^a-zA-Z0-9]+(.)/g, (match, chr) => chr.toUpperCase())
+			.replace(/^[^a-zA-Z]+/, '');
+	}
+
+	/**
+	 * Sanitize color name for use as object key while preserving spaces and hyphens
+	 */
+	sanitizeColorName(str) {
+		return str
+			.toLowerCase()
+			.replace(/[^a-zA-Z0-9\-_ ]/g, '') // Keep alphanumeric, hyphens, underscores, and spaces
+			.replace(/^[^a-zA-Z]+/, '') // Remove leading non-letters
+			.trim(); // Remove leading/trailing spaces
 	}
 
 	/**
@@ -591,8 +815,11 @@ class MaterialColorGenerator {
 				newKey = this.camelToKebab(key);
 			} else if (format === 'Title Case') {
 				newKey = this.camelToTitle(key);
+			} else if (format === 'camelCase' && (key.includes('-') || key.includes(' '))) {
+				// Convert hyphenated or spaced keys to camelCase
+				newKey = this.toCamelCase(key);
 			}
-			// camelCase is default, no transformation needed
+			// camelCase is default, no transformation needed for already camelCase keys
 			
 			transformed[newKey] = this.transformKeys(value, format);
 		}
@@ -634,6 +861,9 @@ class MaterialColorGenerator {
 			return;
 		}
 
+		// Update extended colors array
+		this.updateExtendedColors();
+
 		// Parsing the URL
 		const parsedData = this.parseUrl(url);
 
@@ -643,9 +873,34 @@ class MaterialColorGenerator {
 		// Display the result
 		this.displayResult(result, true);
 
-		// Activate buttons
-		if (this.downloadBtn) this.downloadBtn.disabled = false;
-		if (this.copyBtn) this.copyBtn.disabled = false;
+		// Update panel state after generation
+		this.updatePanelState();
+	}
+
+	/**
+	 * Regenerate color scheme with current extended colors
+	 */
+	async regenerateWithExtendedColors() {
+		if (!this.originalResult) {
+			return;
+		}
+
+		const url = this.urlInput?.value.trim();
+		if (!url) {
+			return;
+		}
+
+		// Update extended colors array
+		this.updateExtendedColors();
+
+		// Parsing the URL
+		const parsedData = this.parseUrl(url);
+
+		// Generate a schema
+		const result = await this.generateColorScheme(parsedData);
+
+		// Display the result
+		this.displayResult(result, true);
 	}
 
 	/**
@@ -657,10 +912,9 @@ class MaterialColorGenerator {
 		// If this is a new result, save as original and apply current format
 		if (isNewResult) {
 			this.originalResult = result;
-			// Apply current naming format if one is selected
-			if (this.namingFormatSelect && this.namingFormatSelect.value !== 'camelCase') {
-				result = this.transformKeys(result, this.namingFormatSelect.value);
-			}
+			// Apply current naming format transformation
+			this.updateResultFormat();
+			return; // updateResultFormat will call displayResult again with transformed result
 		}
 		
 		if (this.resultElement) {
@@ -710,10 +964,12 @@ class MaterialColorGenerator {
 	handleClear() {
 		if (this.urlInput) this.urlInput.value = '';
 		if (this.resultElement) this.resultElement.innerHTML = '';
-		if (this.downloadBtn) this.downloadBtn.disabled = true;
-		if (this.copyBtn) this.copyBtn.disabled = true;
 		if (this.generateBtn) this.generateBtn.disabled = true;
 		this.generatedResult = null;
+		this.originalResult = null;
+		
+		// Update panel state after clearing
+		this.updatePanelState();
 	}
 }
 
