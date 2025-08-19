@@ -1,5 +1,9 @@
+:root {
+	--font-primary: 'Martian Mono', monospace;
+}
+
 body {
-	font-family: 'Martian Mono', monospace;
+	font-family: var(--font-primary);
 	background: 
 		url("data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noiseFilter)' opacity='0.5'/%3E%3C/svg%3E"),
 		radial-gradient(at 58% 16%, #3494c1 0px, transparent 50%),
@@ -7,10 +11,10 @@ body {
 		radial-gradient(at 60% 51%, #6134c1 0px, transparent 50%),
 		radial-gradient(at 31% 52%, #c16134 0px, transparent 50%),
 		radial-gradient(at 55% 43%, #94c134 0px, transparent 50%),
-		#000000 !important;
+		#000000;
 	background-size: 400px 400px, cover, cover, cover, cover, cover, cover;
 	min-height: 100vh;
-	background-attachment: fixed !important;
+	background-attachment: fixed;
 }
 
 .card {
@@ -30,7 +34,7 @@ body {
 }
 
 code {
-	font-family: 'Martian Mono', monospace;
+	font-family: var(--font-primary);
 }
 
 .form-check-input {
@@ -40,14 +44,6 @@ code {
 	margin-right: 0.5rem !important;
 }
 
-.example-url {
-	background-color: rgba(248, 249, 250, 0.8);
-	padding: 0.5rem;
-	border-radius: 0.25rem;
-	display: block;
-	word-break: break-all;
-}
-
 .panel-disabled {
 	opacity: 0.3;
 	filter: grayscale(1);
@@ -55,7 +51,7 @@ code {
 }
 
 header h1, header h2 {
-	color: white !important;
+	color: white;
 	text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
