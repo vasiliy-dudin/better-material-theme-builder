@@ -361,46 +361,72 @@ class MaterialColorGenerator {
 	extractColorRoles(scheme) {
 		const colors = {};
 
-		// Use MaterialDynamicColors for correct extraction of colors
-		// Main colors
+		// Primary colors
 		colors.primary = hexFromArgb(MaterialDynamicColors.primary.getArgb(scheme));
 		colors.onPrimary = hexFromArgb(MaterialDynamicColors.onPrimary.getArgb(scheme));
 		colors.primaryContainer = hexFromArgb(MaterialDynamicColors.primaryContainer.getArgb(scheme));
 		colors.onPrimaryContainer = hexFromArgb(MaterialDynamicColors.onPrimaryContainer.getArgb(scheme));
+		colors.primaryFixed = hexFromArgb(MaterialDynamicColors.primaryFixed.getArgb(scheme));
+		colors.primaryFixedDim = hexFromArgb(MaterialDynamicColors.primaryFixedDim.getArgb(scheme));
+		colors.onPrimaryFixed = hexFromArgb(MaterialDynamicColors.onPrimaryFixed.getArgb(scheme));
+		colors.onPrimaryFixedVariant = hexFromArgb(MaterialDynamicColors.onPrimaryFixedVariant.getArgb(scheme));
 
+		// Secondary colors
 		colors.secondary = hexFromArgb(MaterialDynamicColors.secondary.getArgb(scheme));
 		colors.onSecondary = hexFromArgb(MaterialDynamicColors.onSecondary.getArgb(scheme));
 		colors.secondaryContainer = hexFromArgb(MaterialDynamicColors.secondaryContainer.getArgb(scheme));
 		colors.onSecondaryContainer = hexFromArgb(MaterialDynamicColors.onSecondaryContainer.getArgb(scheme));
+		colors.secondaryFixed = hexFromArgb(MaterialDynamicColors.secondaryFixed.getArgb(scheme));
+		colors.secondaryFixedDim = hexFromArgb(MaterialDynamicColors.secondaryFixedDim.getArgb(scheme));
+		colors.onSecondaryFixed = hexFromArgb(MaterialDynamicColors.onSecondaryFixed.getArgb(scheme));
+		colors.onSecondaryFixedVariant = hexFromArgb(MaterialDynamicColors.onSecondaryFixedVariant.getArgb(scheme));
 
+		// Tertiary colors
 		colors.tertiary = hexFromArgb(MaterialDynamicColors.tertiary.getArgb(scheme));
 		colors.onTertiary = hexFromArgb(MaterialDynamicColors.onTertiary.getArgb(scheme));
 		colors.tertiaryContainer = hexFromArgb(MaterialDynamicColors.tertiaryContainer.getArgb(scheme));
 		colors.onTertiaryContainer = hexFromArgb(MaterialDynamicColors.onTertiaryContainer.getArgb(scheme));
+		colors.tertiaryFixed = hexFromArgb(MaterialDynamicColors.tertiaryFixed.getArgb(scheme));
+		colors.tertiaryFixedDim = hexFromArgb(MaterialDynamicColors.tertiaryFixedDim.getArgb(scheme));
+		colors.onTertiaryFixed = hexFromArgb(MaterialDynamicColors.onTertiaryFixed.getArgb(scheme));
+		colors.onTertiaryFixedVariant = hexFromArgb(MaterialDynamicColors.onTertiaryFixedVariant.getArgb(scheme));
 
+		// Error colors
 		colors.error = hexFromArgb(MaterialDynamicColors.error.getArgb(scheme));
 		colors.onError = hexFromArgb(MaterialDynamicColors.onError.getArgb(scheme));
 		colors.errorContainer = hexFromArgb(MaterialDynamicColors.errorContainer.getArgb(scheme));
 		colors.onErrorContainer = hexFromArgb(MaterialDynamicColors.onErrorContainer.getArgb(scheme));
 
-		// Surfaces
+		// Surface colors
 		colors.surface = hexFromArgb(MaterialDynamicColors.surface.getArgb(scheme));
 		colors.onSurface = hexFromArgb(MaterialDynamicColors.onSurface.getArgb(scheme));
 		colors.surfaceVariant = hexFromArgb(MaterialDynamicColors.surfaceVariant.getArgb(scheme));
 		colors.onSurfaceVariant = hexFromArgb(MaterialDynamicColors.onSurfaceVariant.getArgb(scheme));
+		colors.surfaceDim = hexFromArgb(MaterialDynamicColors.surfaceDim.getArgb(scheme));
+		colors.surfaceBright = hexFromArgb(MaterialDynamicColors.surfaceBright.getArgb(scheme));
+		colors.surfaceContainerLowest = hexFromArgb(MaterialDynamicColors.surfaceContainerLowest.getArgb(scheme));
+		colors.surfaceContainerLow = hexFromArgb(MaterialDynamicColors.surfaceContainerLow.getArgb(scheme));
+		colors.surfaceContainer = hexFromArgb(MaterialDynamicColors.surfaceContainer.getArgb(scheme));
+		colors.surfaceContainerHigh = hexFromArgb(MaterialDynamicColors.surfaceContainerHigh.getArgb(scheme));
+		colors.surfaceContainerHighest = hexFromArgb(MaterialDynamicColors.surfaceContainerHighest.getArgb(scheme));
+		colors.surfaceTint = hexFromArgb(MaterialDynamicColors.surfaceTint.getArgb(scheme));
 
+		// Background colors (deprecated but still included)
 		colors.background = hexFromArgb(MaterialDynamicColors.background.getArgb(scheme));
 		colors.onBackground = hexFromArgb(MaterialDynamicColors.onBackground.getArgb(scheme));
 
-		// Additional colors
+		// Outline colors
 		colors.outline = hexFromArgb(MaterialDynamicColors.outline.getArgb(scheme));
 		colors.outlineVariant = hexFromArgb(MaterialDynamicColors.outlineVariant.getArgb(scheme));
-		colors.shadow = hexFromArgb(MaterialDynamicColors.shadow.getArgb(scheme));
-		colors.scrim = hexFromArgb(MaterialDynamicColors.scrim.getArgb(scheme));
 
+		// Inverse colors
 		colors.inverseSurface = hexFromArgb(MaterialDynamicColors.inverseSurface.getArgb(scheme));
 		colors.inverseOnSurface = hexFromArgb(MaterialDynamicColors.inverseOnSurface.getArgb(scheme));
 		colors.inversePrimary = hexFromArgb(MaterialDynamicColors.inversePrimary.getArgb(scheme));
+
+		// Utility colors
+		colors.shadow = hexFromArgb(MaterialDynamicColors.shadow.getArgb(scheme));
+		colors.scrim = hexFromArgb(MaterialDynamicColors.scrim.getArgb(scheme));
 
 		return colors;
 	}
