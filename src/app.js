@@ -210,6 +210,10 @@ class MaterialColorGenerator {
 			const lightColors = this.extractColorRoles(lightScheme);
 			const darkColors = this.extractColorRoles(darkScheme);
 
+			// Generate State Layers for light and dark themes
+			const lightStateLayers = this.generateStateLayers(lightColors);
+			const darkStateLayers = this.generateStateLayers(darkColors);
+
 			// Generate base role colours for palettes
 			const roleColors = {
 				primary: hexFromArgb(seedArgb),
@@ -225,6 +229,10 @@ class MaterialColorGenerator {
 				schemes: {
 					light: lightColors,
 					dark: darkColors
+				},
+				stateLayers: {
+					light: lightStateLayers,
+					dark: darkStateLayers
 				},
 				palettes: palettes
 			};
@@ -427,6 +435,86 @@ class MaterialColorGenerator {
 		colors.scrim = hexFromArgb(MaterialDynamicColors.scrim.getArgb(scheme));
 
 		return colors;
+	}
+
+	/**
+	 * Generate State Layers with opacity values for interactive states
+	 * @param {Object} colors - Base color roles
+	 * @returns {Object} State layers with opacity values
+	 */
+	generateStateLayers(colors) {
+		const stateLayers = {};
+		
+		// State layer opacity values according to Material Design 3
+		const opacities = {
+			hover: 0.08,
+			focus: 0.12,
+			pressed: 0.12,
+			dragged: 0.16,
+			disabled: 0.38
+		};
+		
+		// Primary state layers
+		stateLayers.primary = {
+			hover: this.addOpacityToHex(colors.primary, opacities.hover),
+			focus: this.addOpacityToHex(colors.primary, opacities.focus),
+			pressed: this.addOpacityToHex(colors.primary, opacities.pressed),
+			dragged: this.addOpacityToHex(colors.primary, opacities.dragged),
+			disabled: this.addOpacityToHex(colors.primary, opacities.disabled)
+		};
+		
+		// Secondary state layers
+		stateLayers.secondary = {
+			hover: this.addOpacityToHex(colors.secondary, opacities.hover),
+			focus: this.addOpacityToHex(colors.secondary, opacities.focus),
+			pressed: this.addOpacityToHex(colors.secondary, opacities.pressed),
+			dragged: this.addOpacityToHex(colors.secondary, opacities.dragged),
+			disabled: this.addOpacityToHex(colors.secondary, opacities.disabled)
+		};
+		
+		// Tertiary state layers
+		stateLayers.tertiary = {
+			hover: this.addOpacityToHex(colors.tertiary, opacities.hover),
+			focus: this.addOpacityToHex(colors.tertiary, opacities.focus),
+			pressed: this.addOpacityToHex(colors.tertiary, opacities.pressed),
+			dragged: this.addOpacityToHex(colors.tertiary, opacities.dragged),
+			disabled: this.addOpacityToHex(colors.tertiary, opacities.disabled)
+		};
+		
+		// Error state layers
+		stateLayers.error = {
+			hover: this.addOpacityToHex(colors.error, opacities.hover),
+			focus: this.addOpacityToHex(colors.error, opacities.focus),
+			pressed: this.addOpacityToHex(colors.error, opacities.pressed),
+			dragged: this.addOpacityToHex(colors.error, opacities.dragged),
+			disabled: this.addOpacityToHex(colors.error, opacities.disabled)
+		};
+		
+		// Surface state layers (using onSurface color)
+		stateLayers.surface = {
+			hover: this.addOpacityToHex(colors.onSurface, opacities.hover),
+			focus: this.addOpacityToHex(colors.onSurface, opacities.focus),
+			pressed: this.addOpacityToHex(colors.onSurface, opacities.pressed),
+			dragged: this.addOpacityToHex(colors.onSurface, opacities.dragged),
+			disabled: this.addOpacityToHex(colors.onSurface, opacities.disabled)
+		};
+		
+		return stateLayers;
+	}
+	
+	/**
+	 * Add opacity to hex color
+	 * @param {string} hexColor - Hex color string
+	 * @param {number} opacity - Opacity value (0-1)
+	 * @returns {string} Hex color with alpha channel
+	 */
+	addOpacityToHex(hexColor, opacity) {
+		// Convert opacity to hex (0-255)
+		const alpha = Math.round(opacity * 255);
+		const alphaHex = alpha.toString(16).padStart(2, '0').toUpperCase();
+		
+		// Return hex color with alpha channel
+		return hexColor + alphaHex;
 	}
 
 	/**
