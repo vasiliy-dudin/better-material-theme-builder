@@ -128,26 +128,30 @@ export class ColorGenerator {
 					});
 					palettes[colorName] = tones;
 					
+					// Convert colorName to proper camelCase for key generation
+					const camelColorName = this.toCamelCase(colorName);
+					const capitalizedColorName = camelColorName.charAt(0).toUpperCase() + camelColorName.slice(1);
+					
 					// Add color roles to schemes (same format as default roles)
 					// Light theme roles
-					lightColors[colorName] = hexFromArgb(tonalPalette.tone(40));
-					lightColors[`on${colorName.charAt(0).toUpperCase() + colorName.slice(1)}`] = hexFromArgb(tonalPalette.tone(100));
-					lightColors[`${colorName}Container`] = hexFromArgb(tonalPalette.tone(90));
-					lightColors[`on${colorName.charAt(0).toUpperCase() + colorName.slice(1)}Container`] = hexFromArgb(tonalPalette.tone(10));
-					lightColors[`${colorName}Fixed`] = hexFromArgb(tonalPalette.tone(90));
-					lightColors[`${colorName}FixedDim`] = hexFromArgb(tonalPalette.tone(80));
-					lightColors[`on${colorName.charAt(0).toUpperCase() + colorName.slice(1)}Fixed`] = hexFromArgb(tonalPalette.tone(10));
-					lightColors[`on${colorName.charAt(0).toUpperCase() + colorName.slice(1)}FixedVariant`] = hexFromArgb(tonalPalette.tone(30));
+					lightColors[camelColorName] = hexFromArgb(tonalPalette.tone(40));
+					lightColors[`on${capitalizedColorName}`] = hexFromArgb(tonalPalette.tone(100));
+					lightColors[`${camelColorName}Container`] = hexFromArgb(tonalPalette.tone(90));
+					lightColors[`on${capitalizedColorName}Container`] = hexFromArgb(tonalPalette.tone(10));
+					lightColors[`${camelColorName}Fixed`] = hexFromArgb(tonalPalette.tone(90));
+					lightColors[`${camelColorName}FixedDim`] = hexFromArgb(tonalPalette.tone(80));
+					lightColors[`on${capitalizedColorName}Fixed`] = hexFromArgb(tonalPalette.tone(10));
+					lightColors[`on${capitalizedColorName}FixedVariant`] = hexFromArgb(tonalPalette.tone(30));
 					
 					// Dark theme roles
-					darkColors[colorName] = hexFromArgb(tonalPalette.tone(80));
-					darkColors[`on${colorName.charAt(0).toUpperCase() + colorName.slice(1)}`] = hexFromArgb(tonalPalette.tone(20));
-					darkColors[`${colorName}Container`] = hexFromArgb(tonalPalette.tone(30));
-					darkColors[`on${colorName.charAt(0).toUpperCase() + colorName.slice(1)}Container`] = hexFromArgb(tonalPalette.tone(90));
-					darkColors[`${colorName}Fixed`] = hexFromArgb(tonalPalette.tone(90));
-					darkColors[`${colorName}FixedDim`] = hexFromArgb(tonalPalette.tone(80));
-					darkColors[`on${colorName.charAt(0).toUpperCase() + colorName.slice(1)}Fixed`] = hexFromArgb(tonalPalette.tone(10));
-					darkColors[`on${colorName.charAt(0).toUpperCase() + colorName.slice(1)}FixedVariant`] = hexFromArgb(tonalPalette.tone(30));
+					darkColors[camelColorName] = hexFromArgb(tonalPalette.tone(80));
+					darkColors[`on${capitalizedColorName}`] = hexFromArgb(tonalPalette.tone(20));
+					darkColors[`${camelColorName}Container`] = hexFromArgb(tonalPalette.tone(30));
+					darkColors[`on${capitalizedColorName}Container`] = hexFromArgb(tonalPalette.tone(90));
+					darkColors[`${camelColorName}Fixed`] = hexFromArgb(tonalPalette.tone(90));
+					darkColors[`${camelColorName}FixedDim`] = hexFromArgb(tonalPalette.tone(80));
+					darkColors[`on${capitalizedColorName}Fixed`] = hexFromArgb(tonalPalette.tone(10));
+					darkColors[`on${capitalizedColorName}FixedVariant`] = hexFromArgb(tonalPalette.tone(30));
 				});
 			}
 
@@ -453,5 +457,15 @@ export class ColorGenerator {
 			.replace(/[^a-zA-Z0-9\-_ ]/g, '') // Keep alphanumeric, hyphens, underscores, and spaces
 			.replace(/^[^a-zA-Z]+/, '') // Remove leading non-letters
 			.trim(); // Remove leading/trailing spaces
+	}
+
+	/**
+	 * Convert string to camelCase
+	 */
+	toCamelCase(str) {
+		return str
+			.toLowerCase()
+			.replace(/[^a-zA-Z0-9]+(.)/g, (match, chr) => chr.toUpperCase())
+			.replace(/^[^a-zA-Z]+/, '');
 	}
 }

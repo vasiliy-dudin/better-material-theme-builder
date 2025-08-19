@@ -16,7 +16,15 @@ export class FormatUtils {
 		if (str.includes('-')) {
 			return str.toLowerCase();
 		}
-		return str.replace(/([A-Z])/g, '-$1').toLowerCase();
+		// Handle camelCase with improved regex for numbers
+		return str
+			// Add hyphen before uppercase letters that follow lowercase letters or numbers
+			.replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+			// Add hyphen before numbers that follow letters
+			.replace(/([a-zA-Z])([0-9])/g, '$1-$2')
+			// Add hyphen before letters that follow numbers
+			.replace(/([0-9])([a-zA-Z])/g, '$1-$2')
+			.toLowerCase();
 	}
 
 	/**
@@ -37,8 +45,16 @@ export class FormatUtils {
 				word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
 			).join(' ');
 		}
-		// Handle camelCase
-		return str.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+		// Handle camelCase - improved regex to handle numbers properly
+		return str
+			// Add space before uppercase letters that follow lowercase letters or numbers
+			.replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+			// Add space before numbers that follow letters
+			.replace(/([a-zA-Z])([0-9])/g, '$1 $2')
+			// Add space before letters that follow numbers
+			.replace(/([0-9])([a-zA-Z])/g, '$1 $2')
+			// Capitalize first letter
+			.replace(/^./, str => str.toUpperCase());
 	}
 
 	/**
