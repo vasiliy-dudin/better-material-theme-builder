@@ -5,51 +5,23 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>MaterialKolor to JSON — Material 3 Color Builder</title>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-	<style>
-		body {
-			background-color: #e8f0ff !important;
-		}
-		.json-output {
-			background-color: #f8f9fa;
-			border: 1px solid #dee2e6;
-			border-radius: 0.375rem;
-			padding: 1rem;
-			margin: 1rem 0;
-			font-family: 'Courier New', monospace;
-			font-size: 0.875rem;
-			white-space: pre-wrap;
-			word-wrap: break-word;
-			max-height: 400px;
-			overflow-y: auto;
-		}
-		.example-url {
-			background-color: #f8f9fa;
-			padding: 0.5rem;
-			border-radius: 0.25rem;
-			display: block;
-			word-break: break-all;
-		}
-		.panel-disabled {
-			opacity: 0.3;
-			filter: grayscale(1);
-			pointer-events: none;
-		}
-	</style>
+	<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@100..800&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 	<div class="container py-4">
 		<header class="text-center mb-5">
-			<h1 class="display-4 fw-bold text-primary">MaterialKolor to JSON</h1>
-			<h2 class="display-5 text-primary">Material 3 Color Builder</h1>
+			<h1 class="display-4 fw-bold">MaterialKolor to JSON</h1>
+			<h2 class="display-5">Material 3 Color Builder</h2>
 		</header>
 
 		<main>
-			<div class="row">
+			<div class="row g-2">
 				<div class="col-lg-6">
-					<div class="card h-100 shadow-sm">
+					<div class="card h-100">
 						<div class="card-body">
 							<div class="mb-3">
-							<h3 class="card-title mb-2">Source</h3>
+							<h3 class="card-title mb-4">Source</h3>
 							<label for="urlInput" class="form-label">MaterialKolor URL</label>
 							<input 
 								type="text" 
@@ -72,20 +44,10 @@
 				</div>
 
 				<div class="col-lg-6">
-					<div class="card h-100 shadow-sm">
+					<div class="card h-100">
 						<div class="card-body">
-							<div class="d-flex justify-content-between align-items-center mb-3">
-				<h3 class="card-title mb-0">Result</h3>
-				<div class="d-flex gap-2">
-					<button id="copyBtn" class="btn btn-secondary btn-sm" disabled>
-						Copy
-					</button>
-					<button id="downloadBtn" class="btn btn-secondary btn-sm" disabled>
-						Download JSON
-					</button>
-				</div>
-			</div>
-					<h5 class="mb-3">Options</h5>
+								<h3 class="card-title mb-4">Result</h3>
+					<h5 class="mt-4 mb-2">Options</h5>
 					<div class="form-check form-switch mb-3">
 						<input class="form-check-input" type="checkbox" id="stateLayersToggle" checked>
 						<label class="form-check-label" for="stateLayersToggle">
@@ -99,18 +61,29 @@
 						</label>
 					</div>
 					<label for="namingFormat" class="form-label">Naming Format</label>
-					<select id="namingFormat" class="form-select mb-3">
+					<select id="namingFormat" class="form-select mb-4">
 						<option value="camelCase">Camel Case (primaryContainer)</option>
 						<option value="kebab-case">Kebab Case (primary-container)</option>
 						<option value="Title Case">Title Case (Primary Container)</option>
 					</select>
-							<h5 class="mb-3">Extended Colors</h5>
+							<h5 class="mt-4 mb-2">Extended Colors</h5>
 							<div id="extendedColorsContainer" class="mb-3">
 								<!-- Dynamic color inputs will be added here -->
 							</div>
 							<button id="addColorBtn" class="btn btn-outline-primary btn-sm mb-3">
 								Add a color
 							</button>
+							<div class="d-flex justify-content-between align-items-center mt-4 mb-2">
+								<h5 class="mb-0">JSON</h5>
+								<div class="d-flex gap-2">
+									<button id="copyBtn" class="btn btn-secondary btn-sm" disabled>
+										Copy
+									</button>
+									<button id="downloadBtn" class="btn btn-secondary btn-sm" disabled>
+										Download JSON
+									</button>
+								</div>
+							</div>
 							<pre id="jsonOutput" class="json-output"></pre>
 						</div>
 						</div>
@@ -120,8 +93,8 @@
 		</main>
 		
 		<footer class="text-center mt-3 py-3">
-			<p class="text-muted mb-0">Updated: 19 Aug 2025. Powered by the latest Material Design color algorithm.</p>
-			<p class="text-muted mb-0">
+			<p class="mb-0">Updated: 19 Aug 2025. Powered by the latest Material Design color algorithm.</p>
+			<p class="mb-0">
 				<a href="https://github.com/vasiliy-dudin/MaterialKolor-to-json" target="_blank" class="text-decoration-none">
 					GitHub Repository
 				</a>
