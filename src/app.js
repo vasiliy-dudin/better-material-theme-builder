@@ -96,8 +96,11 @@ class MaterialColorGenerator {
 		// Generate color scheme
 		const result = await this.colorGenerator.generateColorScheme(parsedData, extendedColors);
 
-		// Display the result
+		// Save as new original result
 		this.uiManager.displayResult(result, true);
+		
+		// Apply current format settings to preserve user's toggle states
+		this.updateResultFormat();
 	}
 
 }
