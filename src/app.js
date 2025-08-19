@@ -28,7 +28,7 @@ class MaterialColorGenerator {
 			'FRUIT_SALAD': Variant.FRUIT_SALAD
 		};
 
-		// Tonal values for palettes
+		// Tonal values for tonal palettes
 		this.tones = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 99, 100];
 
 		// Colour roles
@@ -48,6 +48,12 @@ class MaterialColorGenerator {
 		this.copyBtn = document.getElementById('copyBtn');
 		this.clearBtn = document.getElementById('clearBtn');
 		this.resultElement = document.getElementById('jsonOutput');
+		this.namingFormatSelect = document.getElementById('namingFormat');
+		this.stateLayersToggle = document.getElementById('stateLayersToggle');
+		this.tonalPalettesToggle = document.getElementById('tonalPalettesToggle');
+		
+		// Store original result for format conversion
+		this.originalResult = null;
 
 		// Bind events
 		this.bindEvents();
@@ -85,6 +91,33 @@ class MaterialColorGenerator {
 			this.urlInput.addEventListener('input', () => {
 				if (this.generateBtn) {
 					this.generateBtn.disabled = !this.urlInput.value.trim();
+				}
+			});
+		}
+
+		// Handle naming format change
+		if (this.namingFormatSelect) {
+			this.namingFormatSelect.addEventListener('change', () => {
+				if (this.originalResult) {
+					this.updateResultFormat();
+				}
+			});
+		}
+
+		// Handle state layers toggle
+		if (this.stateLayersToggle) {
+			this.stateLayersToggle.addEventListener('change', () => {
+				if (this.originalResult) {
+					this.updateResultFormat();
+				}
+			});
+		}
+
+		// Handle tonal palettes toggle
+		if (this.tonalPalettesToggle) {
+			this.tonalPalettesToggle.addEventListener('change', () => {
+				if (this.originalResult) {
+					this.updateResultFormat();
 				}
 			});
 		}
@@ -214,7 +247,7 @@ class MaterialColorGenerator {
 			const lightStateLayers = this.generateStateLayers(lightColors);
 			const darkStateLayers = this.generateStateLayers(darkColors);
 
-			// Generate base role colours for palettes
+			// Generate base role colours for tonal palettes
 			const roleColors = {
 				primary: hexFromArgb(seedArgb),
 				secondary: this.generateRoleColor(seedArgb, 'secondary', variant),
@@ -244,7 +277,7 @@ class MaterialColorGenerator {
 	}
 
 	/**
-	 * Generate palettes for light and dark themes
+	 * Generate tonal palettes for light and dark themes
 	 */
 	generatePalettes(seedArgb, customColors, variant, specVersion) {
 		const palettes = {};
@@ -518,6 +551,81 @@ class MaterialColorGenerator {
 	}
 
 	/**
+	 * Convert camelCase to kebab-case
+	 * @param {string} str - String in camelCase
+	 * @returns {string} String in kebab-case
+	 */
+	camelToKebab(str) {
+		return str.replace(/([A-Z])/g, '-$1').toLowerCase();
+	}
+
+	/**
+	 * Convert camelCase to Title Case
+	 * @param {string} str - String in camelCase
+	 * @returns {string} String in Title Case
+	 */
+	camelToTitle(str) {
+		return str.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+	}
+
+	/**
+	 * Transform object keys based on naming format
+	 * @param {Object} obj - Object to transform
+	 * @param {string} format - Naming format (camelCase, kebab-case, Title Case)
+	 * @returns {Object} Transformed object
+	 */
+	transformKeys(obj, format) {
+		if (typeof obj !== 'object' || obj === null) {
+			return obj;
+		}
+
+		if (Array.isArray(obj)) {
+			return obj.map(item => this.transformKeys(item, format));
+		}
+
+		const transformed = {};
+		for (const [key, value] of Object.entries(obj)) {
+			let newKey = key;
+			
+			if (format === 'kebab-case') {
+				newKey = this.camelToKebab(key);
+			} else if (format === 'Title Case') {
+				newKey = this.camelToTitle(key);
+			}
+			// camelCase is default, no transformation needed
+			
+			transformed[newKey] = this.transformKeys(value, format);
+		}
+		return transformed;
+	}
+
+	/**
+	 * Update result display with selected naming format, state layers toggle, and tonal palettes toggle
+	 */
+	updateResultFormat() {
+		if (!this.originalResult || !this.namingFormatSelect) return;
+		
+		let resultToTransform = { ...this.originalResult };
+		
+		// Handle state layers toggle
+		if (this.stateLayersToggle && !this.stateLayersToggle.checked) {
+			// Remove state layers from result
+			delete resultToTransform.stateLayers;
+		}
+		
+		// Handle tonal palettes toggle
+		if (this.tonalPalettesToggle && !this.tonalPalettesToggle.checked) {
+			// Remove tonal palettes from result
+			delete resultToTransform.palettes;
+		}
+		
+		const selectedFormat = this.namingFormatSelect.value;
+		const transformedResult = this.transformKeys(resultToTransform, selectedFormat);
+		
+		this.displayResult(transformedResult);
+	}
+
+	/**
 	 * Handle generation
 	 */
 	async handleGenerate() {
@@ -533,7 +641,7 @@ class MaterialColorGenerator {
 		const result = await this.generateColorScheme(parsedData);
 
 		// Display the result
-		this.displayResult(result);
+		this.displayResult(result, true);
 
 		// Activate buttons
 		if (this.downloadBtn) this.downloadBtn.disabled = false;
@@ -542,13 +650,24 @@ class MaterialColorGenerator {
 
 	/**
 	 * Display result
+	 * @param {Object} result - Result to display
+	 * @param {boolean} isNewResult - Whether this is a new result (not a format transformation)
 	 */
-	displayResult(result) {
+	displayResult(result, isNewResult = false) {
+		// If this is a new result, save as original and apply current format
+		if (isNewResult) {
+			this.originalResult = result;
+			// Apply current naming format if one is selected
+			if (this.namingFormatSelect && this.namingFormatSelect.value !== 'camelCase') {
+				result = this.transformKeys(result, this.namingFormatSelect.value);
+			}
+		}
+		
 		if (this.resultElement) {
 			this.resultElement.innerHTML = `<pre><code>${JSON.stringify(result, null, 2)}</code></pre>`;
 		}
 
-		// Save for export
+		// Save for export (always use the currently displayed result)
 		this.generatedResult = result;
 	}
 
