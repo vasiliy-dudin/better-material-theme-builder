@@ -11,6 +11,7 @@ export class UIManager {
 		this.initializeElements();
 		this.bindEvents();
 		this.updatePanelState();
+		this.initializeDropdownHandlers();
 	}
 
 	/**
@@ -126,7 +127,7 @@ export class UIManager {
 	 */
 	addExtendedColor() {
 		// Calculate the next color number based on existing colors
-		const existingColors = this.extendedColorsContainer.querySelectorAll('input[type="color"]');
+		const existingColors = this.extendedColorsContainer.querySelectorAll('color-picker');
 		const nextColorNumber = existingColors.length + 1;
 		this.extendedColorCounter = Math.max(this.extendedColorCounter, nextColorNumber);
 		const colorId = `extendedColor${this.extendedColorCounter}`;
@@ -137,7 +138,12 @@ export class UIManager {
 		colorDiv.id = `${colorId}Container`;
 		
 		colorDiv.innerHTML = `
-			<input type="color" class="form-control form-control-color" id="${colorId}" value="#ff5722" style="max-width: 80px;">
+			<div class="color-preview-container" style="position: relative;">
+				<div class="color-preview" id="${colorId}Preview" style="width: 40px; height: 38px; background-color: #ff5722; border: 1px solid #dee2e6; border-radius: 8px 0 0 8px; cursor: pointer;"></div>
+				<div class="color-picker-dropdown" id="${colorId}Dropdown" style="position: absolute; top: 100%; left: 0; z-index: 1000; background: white; border: 1px solid #dee2e6; border-radius: 8px; padding: 10px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1); display: none;">
+					<color-picker space="oklch" color="oklch(60% 30% 20)" id="${colorId}" style="width: 500px;"></color-picker>
+				</div>
+			</div>
 			<input type="text" class="form-control" placeholder="HEX code" id="${colorId}Hex" value="#ff5722" maxlength="7" style="max-width: 120px;">
 			<input type="text" class="form-control" placeholder="Color name" id="${colorId}Name" value="${colorName}">
 			<button class="btn btn-outline-danger" type="button" data-color-id="${colorId}">
@@ -149,20 +155,37 @@ export class UIManager {
 		
 		// Add event listeners for real-time updates
 		const colorInput = document.getElementById(colorId);
+		const colorPreview = document.getElementById(`${colorId}Preview`);
+		const colorDropdown = document.getElementById(`${colorId}Dropdown`);
 		const hexInput = document.getElementById(`${colorId}Hex`);
 		const nameInput = document.getElementById(`${colorId}Name`);
 		const removeBtn = colorDiv.querySelector('button[data-color-id]');
 		
-		// Sync color picker with hex input
-		colorInput.addEventListener('input', () => {
-			hexInput.value = colorInput.value;
+		// Toggle dropdown on preview click
+		colorPreview.addEventListener('click', (e) => {
+			e.stopPropagation();
+			const isVisible = colorDropdown.style.display === 'block';
+			// Hide all other dropdowns
+			document.querySelectorAll('.color-picker-dropdown').forEach(dropdown => {
+				dropdown.style.display = 'none';
+			});
+			// Toggle current dropdown
+			colorDropdown.style.display = isVisible ? 'none' : 'block';
+		});
+
+		// Sync color picker with hex input and preview
+		colorInput.addEventListener('colorchange', () => {
+			const hexColor = colorInput.color.to('srgb').toString({format: 'hex'});
+			hexInput.value = hexColor;
+			colorPreview.style.backgroundColor = hexColor;
 			this.regenerateWithExtendedColors();
 		});
 		
-		// Sync hex input with color picker
+		// Sync hex input with color picker and preview
 		hexInput.addEventListener('input', () => {
 			if (this.isValidHex(hexInput.value)) {
-				colorInput.value = hexInput.value;
+				colorInput.setAttribute('color', `oklch(from ${hexInput.value} l c h)`);
+				colorPreview.style.backgroundColor = hexInput.value;
 				this.regenerateWithExtendedColors();
 			}
 		});
@@ -172,6 +195,20 @@ export class UIManager {
 		
 		// Update extended colors array and result
 		this.regenerateWithExtendedColors();
+	}
+
+	/**
+	 * Initialize global dropdown handlers
+	 */
+	initializeDropdownHandlers() {
+		// Close dropdowns when clicking outside
+		document.addEventListener('click', (e) => {
+			if (!e.target.closest('.color-preview-container')) {
+				document.querySelectorAll('.color-picker-dropdown').forEach(dropdown => {
+					dropdown.style.display = 'none';
+				});
+			}
+		});
 	}
 
 	/**
@@ -192,13 +229,13 @@ export class UIManager {
 	updateExtendedColors() {
 		this.extendedColors = [];
 		
-		const colorInputs = this.extendedColorsContainer.querySelectorAll('input[type="color"]');
+		const colorInputs = this.extendedColorsContainer.querySelectorAll('color-picker');
 		colorInputs.forEach(input => {
 			const hexInput = document.getElementById(`${input.id}Hex`);
 			const nameInput = document.getElementById(`${input.id}Name`);
 			if (nameInput && hexInput) {
 				const colorName = nameInput.value.trim() || nameInput.placeholder || 'Custom color';
-				const colorValue = hexInput.value.trim() || input.value;
+				const colorValue = hexInput.value.trim() || input.color?.to('srgb').toString({format: 'hex'}) || '#ff5722';
 				this.extendedColors.push({
 					name: colorName,
 					color: colorValue

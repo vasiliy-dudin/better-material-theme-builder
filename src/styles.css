@@ -37,6 +37,22 @@ code {
 	font-family: var(--font-primary);
 }
 
+/* Hide unwanted elements in color picker */
+color-picker::part(color-space) {
+	display: none !important;
+}
+
+.color-preview {
+	transition: all 0.2s ease;
+}
+
+.color-preview:hover {
+	transform: scale(1.05);
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+
+
 .form-check-input {
 	width: 2.5rem !important;
 	height: 1.25rem !important;
