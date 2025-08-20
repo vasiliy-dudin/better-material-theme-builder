@@ -2,6 +2,8 @@
 
 ![MaterialKolor-to-json screenshot](img.webp)
 
+https://vasiliy-dudin.github.io/MaterialKolor-to-json/
+
 A tool for generating comprehensive Material Design 3 colour schemes from MaterialKolor.com URLs. Exports colour tokens in JSON format for seamless integration with design systems.
 
 ## What it does
