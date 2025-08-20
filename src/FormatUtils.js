@@ -120,7 +120,7 @@ export class FormatUtils {
 		// Handle tonal palettes toggle
 		if (!includeTonalPalettes) {
 			// Remove tonal palettes from result
-			delete resultToTransform.palettes;
+			delete resultToTransform.tonalPalettes;
 		}
 		
 		return resultToTransform;

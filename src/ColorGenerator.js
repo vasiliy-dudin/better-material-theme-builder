@@ -165,7 +165,7 @@ export class ColorGenerator {
 					light: lightStateLayers,
 					dark: darkStateLayers
 				},
-				palettes: palettes
+				tonalPalettes: palettes
 			};
 
 			return result;
