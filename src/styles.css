@@ -151,3 +151,16 @@ footer a:hover {
 .input-group .color-name-input {
 	flex: 1;
 }
+
+/* Naming format */
+.naming-format-group {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	width: fit-content;
+}
+
+#namingFormat {
+	width: auto;
+	max-width: 256px;
+}
