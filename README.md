@@ -16,31 +16,42 @@ A tool for generating comprehensive Material Design 3 colour schemes from Materi
 
 ## For designers and frontend developers
 
-This tool is particularly useful for customising design system layouts in Figma. The generated JSON can be imported as Figma variables or design tokens using plugins.
-
-The structured output ensures consistency across your design system and development workflow.
+- For designers: import tokens into Figma Variables via the "Luckino – Variables Import/Export JSON & CSS" plugin, or import this output JSON into Tokens Studio.
+- For developers: use the output JSON with Style Dictionary, or add it directly to your project configuration, as in Vuetify.
 
 ## Output format
 
+### W3C Design Tokens (W3C DTCG)
+
 ```json
 {
-  "colors": {
-    "primary": "#6750A4",
-    "onPrimary": "#FFFFFF",
-    "primaryContainer": "#EADDFF"
-  },
-  "stateLayers": {
-    "primary": {
-      "hover": "#6750A414",
-      "focus": "#6750A41F"
+  "Semantic colors": {
+    "Schemes": {
+      "primary": {
+        "$type": "color",
+        "$value": {
+          "Light": "#006a6c",
+          "Dark": "#52f2f5"
+        }
+      }
     }
-  },
-  "tonalPalettes": {
-    "primary": {
-      "0": "#000000",
-      "10": "#21005D",
-      "20": "#381E72"
-    }
+  }
+}
+```
+
+### Simple JSON
+
+```json
+{
+  "schemes": {
+    "light": {
+      "primary": "#006a6c",
+      "onPrimary": "#e0ffff",
+      "primaryContainer": "#52f2f5",
+      "onPrimaryContainer": "#005859",
+      "primaryFixed": "#52f2f5"
+    },
+    "dark": {...}
   }
 }
 ```
