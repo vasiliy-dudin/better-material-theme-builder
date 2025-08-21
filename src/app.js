@@ -2,7 +2,7 @@ import { ColorParser } from './ColorParser.js';
 import { ColorGenerator } from './ColorGenerator.js';
 import { UIManager } from './UIManager.js';
 import { FormatUtils } from './FormatUtils.js';
-import { FigmaFormatConverter } from './FigmaFormatConverter.js';
+import { W3cDtcgConverter } from './W3cDtcgConverter.js';
 
 /**
  * Main class for generating colour schemes
@@ -55,7 +55,7 @@ class MaterialColorGenerator {
 			);
 			
 			// Convert to W3C Design Tokens format
-			const w3cResult = FigmaFormatConverter.convertToFigmaFormat(filteredResult);
+			const w3cResult = W3cDtcgConverter.convertToW3cDtcgFormat(filteredResult);
 			
 			// Apply naming format to W3C structure, preserving top-level collection name
 			formattedResult = this.transformW3cKeysExceptTopLevel(w3cResult, namingFormat);

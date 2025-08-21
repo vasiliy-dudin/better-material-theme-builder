@@ -1,5 +1,7 @@
+import { ColorUtils } from './ColorUtils.js';
+
 /**
- * Module for formatting and transforming data
+ * Module for key transformation and result formatting
  */
 export class FormatUtils {
 	/**
@@ -126,6 +128,7 @@ export class FormatUtils {
 		return resultToTransform;
 	}
 
+
 	/**
 	 * Format result with specified naming format and options
 	 * @param {Object} result - Original result object
@@ -138,7 +141,10 @@ export class FormatUtils {
 		// Apply format options first
 		const filteredResult = this.applyFormatOptions(result, includeStateLayers, includeTonalPalettes);
 		
+		// Convert transparent colors to rgba format
+		const rgbaResult = ColorUtils.convertTransparentColors(filteredResult);
+		
 		// Transform keys based on naming format
-		return this.transformKeys(filteredResult, namingFormat);
+		return this.transformKeys(rgbaResult, namingFormat);
 	}
 }
