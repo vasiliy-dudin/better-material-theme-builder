@@ -328,13 +328,14 @@ export class UIManager {
 		if (colorPicker && colorPreview) {
 			// Set initial color
 			colorPicker.color = '#6750A4';
-			colorPreview.style.backgroundColor = '#6750A4';
+			colorDiv.querySelector('.color-picker-container').style.setProperty('--preview-color', '#6750A4');
 			hexInput.value = '#6750A4';
 
 			// Color picker changes
 			colorPicker.addEventListener('color-changed', (e) => {
 				const color = e.detail.color.toString({ format: 'hex' });
-				colorPreview.style.backgroundColor = color;
+				const container = colorDiv.querySelector('.color-picker-container');
+				container.style.setProperty('--preview-color', color);
 				hexInput.value = color;
 				this.onExtendedColorsUpdate?.();
 			});
@@ -345,7 +346,8 @@ export class UIManager {
 					try {
 						const color = colorPicker.color ? colorPicker.color.toString({ format: 'hex' }) : colorPicker.value;
 						if (color) {
-							colorPreview.style.backgroundColor = color;
+							const container = colorDiv.querySelector('.color-picker-container');
+							container.style.setProperty('--preview-color', color);
 							hexInput.value = color;
 							this.onExtendedColorsUpdate?.();
 						}
@@ -360,7 +362,8 @@ export class UIManager {
 				const color = e.target.value;
 				if (this.isValidHexColor(color)) {
 					colorPicker.color = color;
-					colorPreview.style.backgroundColor = color;
+					const container = colorDiv.querySelector('.color-picker-container');
+					container.style.setProperty('--preview-color', color);
 				}
 			});
 

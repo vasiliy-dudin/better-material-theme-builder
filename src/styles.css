@@ -37,12 +37,9 @@ code {
 	font-family: var(--font-primary);
 }
 
-/* Hide unwanted elements in color picker */
-color-picker::part(color-space) {
-	display: none !important;
-}
 
 .color-picker-container {
+	--preview-color: #6750A4;
 	position: relative;
 	display: flex;
 	align-items: center;
@@ -56,7 +53,7 @@ color-picker::part(color-space) {
 	border: 2px solid rgba(255, 255, 255, 0.2);
 	cursor: pointer;
 	transition: all 0.2s ease;
-	background-color: #6750A4;
+	background-color: var(--preview-color);
 }
 
 .color-preview:hover {
@@ -95,6 +92,16 @@ color-picker::part(color-space) {
 		opacity: 1;
 		transform: translateY(0) scale(1);
 	}
+}
+
+/* Hide unwanted elements in color picker */
+color-picker::part(color-space),
+color-picker::part(details) {
+	display: none !important;
+}
+
+color-picker::part(swatch) {
+    --color: var(--preview-color);
 }
 
 
