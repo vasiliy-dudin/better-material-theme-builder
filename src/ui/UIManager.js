@@ -146,7 +146,7 @@ export class UIManager {
 	 * Get selected naming format
 	 */
 	getNamingFormat() {
-		return this.namingFormatSelect?.value || 'camelCase';
+		return this.namingFormatSelect?.value || 'kebab-case';
 	}
 
 	/**
