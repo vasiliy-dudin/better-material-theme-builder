@@ -28,6 +28,7 @@ export class UIManager {
 		this.namingFormatSelect = document.getElementById('namingFormat');
 		this.stateLayersToggle = document.getElementById('stateLayersToggle');
 		this.tonalPalettesToggle = document.getElementById('tonalPalettesToggle');
+		this.w3cFormatToggle = document.getElementById('w3cFormatToggle');
 		this.addColorBtn = document.getElementById('addColorBtn');
 		this.extendedColorsContainer = document.getElementById('extendedColorsContainer');
 	}
@@ -89,6 +90,15 @@ export class UIManager {
 		// Handle tonal palettes toggle
 		if (this.tonalPalettesToggle) {
 			this.tonalPalettesToggle.addEventListener('change', () => {
+				if (this.originalResult) {
+					this.onFormatChange?.();
+				}
+			});
+		}
+
+		// Handle W3C format toggle
+		if (this.w3cFormatToggle) {
+			this.w3cFormatToggle.addEventListener('change', () => {
 				if (this.originalResult) {
 					this.onFormatChange?.();
 				}
@@ -387,6 +397,14 @@ export class UIManager {
 	getTonalPalettesEnabled() {
 		return this.tonalPalettesToggle?.checked ?? true;
 	}
+
+	/**
+	 * Get W3C format enabled state
+	 */
+	getW3cFormatEnabled() {
+		return this.w3cFormatToggle?.checked ?? false;
+	}
+
 
 	/**
 	 * Get extended colors

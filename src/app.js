@@ -2,6 +2,7 @@ import { ColorParser } from './ColorParser.js';
 import { ColorGenerator } from './ColorGenerator.js';
 import { UIManager } from './UIManager.js';
 import { FormatUtils } from './FormatUtils.js';
+import { FigmaFormatConverter } from './FigmaFormatConverter.js';
 
 /**
  * Main class for generating colour schemes
@@ -32,7 +33,7 @@ class MaterialColorGenerator {
 
 
 	/**
-	 * Update result display with selected naming format, state layers toggle, and tonal palettes toggle
+	 * Update result display with selected naming format, state layers toggle, tonal palettes toggle, and W3C format toggle
 	 */
 	updateResultFormat() {
 		const originalResult = this.uiManager.getOriginalResult();
@@ -41,15 +42,51 @@ class MaterialColorGenerator {
 		const namingFormat = this.uiManager.getNamingFormat();
 		const includeStateLayers = this.uiManager.getStateLayersEnabled();
 		const includeTonalPalettes = this.uiManager.getTonalPalettesEnabled();
+		const useW3cFormat = this.uiManager.getW3cFormatEnabled();
 		
-		const formattedResult = this.formatUtils.formatResult(
-			originalResult,
-			namingFormat,
-			includeStateLayers,
-			includeTonalPalettes
-		);
+		let formattedResult;
+		
+		if (useW3cFormat) {
+			// For W3C format: apply filters first, then convert to W3C, then apply naming format
+			const filteredResult = this.formatUtils.applyFormatOptions(
+				originalResult,
+				includeStateLayers,
+				includeTonalPalettes
+			);
+			
+			// Convert to W3C Design Tokens format
+			const w3cResult = FigmaFormatConverter.convertToFigmaFormat(filteredResult);
+			
+			// Apply naming format to W3C structure, preserving top-level collection name
+			formattedResult = this.transformW3cKeysExceptTopLevel(w3cResult, namingFormat);
+		} else {
+			// Standard format: apply all formatting together
+			formattedResult = this.formatUtils.formatResult(
+				originalResult,
+				namingFormat,
+				includeStateLayers,
+				includeTonalPalettes
+			);
+		}
 		
 		this.uiManager.displayResult(formattedResult);
+	}
+
+	/**
+	 * Transform W3C Design Tokens keys except the top-level collection name
+	 * @param {Object} w3cResult - W3C Design Tokens object
+	 * @param {string} namingFormat - Naming format to apply
+	 * @returns {Object} Transformed object with preserved collection name
+	 */
+	transformW3cKeysExceptTopLevel(w3cResult, namingFormat) {
+		const result = {};
+		
+		// Preserve top-level collection names, but transform their contents
+		Object.keys(w3cResult).forEach(topLevelKey => {
+			result[topLevelKey] = this.formatUtils.transformKeys(w3cResult[topLevelKey], namingFormat);
+		});
+		
+		return result;
 	}
 
 	/**
