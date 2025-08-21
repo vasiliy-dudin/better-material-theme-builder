@@ -42,13 +42,59 @@ color-picker::part(color-space) {
 	display: none !important;
 }
 
+.color-picker-container {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
 .color-preview {
+	width: 40px;
+	height: 38px;
+	border-radius: 8px 0 0 8px;
+	border: 2px solid rgba(255, 255, 255, 0.2);
+	cursor: pointer;
 	transition: all 0.2s ease;
+	background-color: #6750A4;
 }
 
 .color-preview:hover {
 	transform: scale(1.05);
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.color-dropdown {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	margin-top: 8px;
+	padding: 16px;
+	border-radius: 12px;
+	background: rgba(255, 255, 255, 0.95);
+	-webkit-backdrop-filter: blur(20px);
+	backdrop-filter: blur(20px);
+	border: 1px solid rgba(255, 255, 255, 0.3);
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+	z-index: 1000;
+	display: none;
+	width: 500px;
+}
+
+.color-dropdown.show {
+	display: block;
+	animation: dropdown-appear 0.2s ease-out;
+}
+
+@keyframes dropdown-appear {
+	from {
+		opacity: 0;
+		transform: translateY(-10px) scale(0.95);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
 }
 
 
@@ -82,4 +128,19 @@ footer a {
 
 footer a:hover {
 	color: #d4c5f9;
+}
+
+/* Color form styling with input-group */
+.input-group .color-picker-container {
+	display: flex;
+	align-items: center;
+}
+
+.input-group .color-hex-input {
+	width: 128px;
+	flex: 0 0 128px;
+}
+
+.input-group .color-name-input {
+	flex: 1;
 }

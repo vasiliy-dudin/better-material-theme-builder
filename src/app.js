@@ -1,17 +1,18 @@
-import { ColorParser } from './ColorParser.js';
-import { ColorGenerator } from './ColorGenerator.js';
-import { UIManager } from './UIManager.js';
-import { FormatUtils } from './FormatUtils.js';
-import { W3cDtcgConverter } from './W3cDtcgConverter.js';
+import { ColorParser } from './core/ColorParser.js';
+import { ColorGeneratorService } from './services/ColorGeneratorService.js';
+import { UIManager } from './ui/UIManager.js';
+import { FormatUtils } from './utils/FormatUtils.js';
+import { W3cDtcgConverter } from './formatters/W3cDtcgConverter.js';
 
 /**
- * Main class for generating colour schemes
+ * Main application controller for Material Color Generator
+ * Coordinates between UI, services, and formatters
  */
-class MaterialColorGenerator {
+class MaterialColorApp {
 	constructor() {
-		// Initialize modules
+		// Initialize core services
 		this.colorParser = new ColorParser();
-		this.colorGenerator = new ColorGenerator();
+		this.colorGenerator = new ColorGeneratorService();
 		this.uiManager = new UIManager();
 		this.formatUtils = new FormatUtils();
 
@@ -20,20 +21,46 @@ class MaterialColorGenerator {
 	}
 
 	/**
-	 * Bind UI callbacks to modules
+	 * Bind UI callbacks to application logic
 	 */
 	bindUICallbacks() {
-		// Set callbacks for UI manager
 		this.uiManager.setGenerateCallback(() => this.handleGenerate());
 		this.uiManager.setFormatChangeCallback(() => this.updateResultFormat());
 		this.uiManager.setExtendedColorsUpdateCallback(() => this.regenerateWithExtendedColors());
 	}
 
+	/**
+	 * Handle generate button click
+	 */
+	async handleGenerate() {
+		const url = this.uiManager.getUrlValue();
+		if (!url) {
+			return;
+		}
 
+		try {
+			// Get extended colors from UI
+			const extendedColors = this.uiManager.getExtendedColors();
 
+			// Parse the URL
+			const parsedData = this.colorParser.parseUrl(url);
+
+			// Generate color scheme
+			const result = await this.colorGenerator.generateColorScheme(parsedData, extendedColors);
+
+			// Display the result
+			this.uiManager.displayResult(result, true);
+			
+			// Apply format settings right after generating
+			this.updateResultFormat();
+		} catch (error) {
+			console.error('Error generating colors:', error);
+			// Could add user-facing error handling here
+		}
+	}
 
 	/**
-	 * Update result display with selected naming format, state layers toggle, tonal palettes toggle, and W3C format toggle
+	 * Update result display with selected formatting options
 	 */
 	updateResultFormat() {
 		const originalResult = this.uiManager.getOriginalResult();
@@ -90,28 +117,6 @@ class MaterialColorGenerator {
 	}
 
 	/**
-	 * Handle generation
-	 */
-	async handleGenerate() {
-		const url = this.uiManager.getUrlValue();
-		if (!url) {
-			return;
-		}
-
-		// Get extended colors from UI
-		const extendedColors = this.uiManager.getExtendedColors();
-
-		// Parse the URL
-		const parsedData = this.colorParser.parseUrl(url);
-
-		// Generate color scheme
-		const result = await this.colorGenerator.generateColorScheme(parsedData, extendedColors);
-
-		// Display the result
-		this.uiManager.displayResult(result, true);
-	}
-
-	/**
 	 * Regenerate color scheme with current extended colors
 	 */
 	async regenerateWithExtendedColors() {
@@ -124,28 +129,31 @@ class MaterialColorGenerator {
 			return;
 		}
 
-		// Get extended colors from UI
-		const extendedColors = this.uiManager.getExtendedColors();
+		try {
+			// Get extended colors from UI
+			const extendedColors = this.uiManager.getExtendedColors();
 
-		// Parse the URL
-		const parsedData = this.colorParser.parseUrl(url);
+			// Parse the URL
+			const parsedData = this.colorParser.parseUrl(url);
 
-		// Generate color scheme
-		const result = await this.colorGenerator.generateColorScheme(parsedData, extendedColors);
+			// Generate color scheme
+			const result = await this.colorGenerator.generateColorScheme(parsedData, extendedColors);
 
-		// Save as new original result
-		this.uiManager.displayResult(result, true);
-		
-		// Apply current format settings to preserve user's toggle states
-		this.updateResultFormat();
+			// Save as new original result
+			this.uiManager.displayResult(result, true);
+			
+			// Apply current format settings to preserve user's toggle states
+			this.updateResultFormat();
+		} catch (error) {
+			console.error('Error regenerating colors:', error);
+		}
 	}
-
 }
 
-// Application initialisation on DOM loading
+// Application initialization on DOM loading
 document.addEventListener('DOMContentLoaded', () => {
-	new MaterialColorGenerator();
+	new MaterialColorApp();
 });
 
-// Exporting a class for use in other modules
-export default MaterialColorGenerator;
+// Export for potential module use
+export default MaterialColorApp;

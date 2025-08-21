@@ -128,7 +128,6 @@ export class FormatUtils {
 		return resultToTransform;
 	}
 
-
 	/**
 	 * Format result with specified naming format and options
 	 * @param {Object} result - Original result object

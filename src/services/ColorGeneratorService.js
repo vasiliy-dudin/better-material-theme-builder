@@ -1,0 +1,424 @@
+import {
+	argbFromHex,
+	hexFromArgb,
+	themeFromSourceColor,
+	Hct,
+	DynamicScheme,
+	Variant,
+	SpecVersion,
+	MaterialDynamicColors,
+	TonalPalette
+} from '@materialx/material-color-utilities';
+
+/**
+ * Service for generating Material Design color schemes and palettes
+ */
+export class ColorGeneratorService {
+	constructor() {
+		// Mapping of scheme names to numbers
+		this.styleMapping = {
+			'MONOCHROME': Variant.MONOCHROME,
+			'NEUTRAL': Variant.NEUTRAL,
+			'TONAL_SPOT': Variant.TONAL_SPOT,
+			'VIBRANT': Variant.VIBRANT,
+			'EXPRESSIVE': Variant.EXPRESSIVE,
+			'FIDELITY': Variant.FIDELITY,
+			'CONTENT': Variant.CONTENT,
+			'RAINBOW': Variant.RAINBOW,
+			'FRUIT_SALAD': Variant.FRUIT_SALAD
+		};
+
+		// Tonal values for tonal palettes
+		this.tones = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 99, 100];
+
+		// Colour roles
+		this.colorRoles = ['primary', 'secondary', 'tertiary', 'error', 'neutral', 'neutralVariant'];
+	}
+
+	/**
+	 * Generate comprehensive color scheme
+	 * @param {Object} parsedData - Parsed URL data
+	 * @param {Array} extendedColors - Additional custom colors
+	 * @returns {Object} Complete color scheme
+	 */
+	async generateColorScheme(parsedData, extendedColors = []) {
+		try {
+			const { seedColor, style, colorSpec, customColors } = parsedData;
+
+			// Convert seed colour to ARGB and HCT
+			const seedArgb = argbFromHex(seedColor);
+			const seedHct = Hct.fromInt(seedArgb);
+
+			// Determine specification
+			const specVersion = colorSpec === 'SPEC_2025' ? SpecVersion.SPEC_2025 : SpecVersion.SPEC_2021;
+
+			// Create dynamic scheme variants
+			const variant = this.styleMapping[style] || Variant.TONAL_SPOT;
+			const lightScheme = new DynamicScheme({
+				sourceColorHct: seedHct,
+				variant: variant,
+				isDark: false,
+				contrastLevel: 0.0,
+				specVersion: specVersion
+			});
+
+			const darkScheme = new DynamicScheme({
+				sourceColorHct: seedHct,
+				variant: variant,
+				isDark: true,
+				contrastLevel: 0.0,
+				specVersion: specVersion
+			});
+
+			// Generate color schemes
+			const lightColors = this.generateSchemeColors(lightScheme);
+			const darkColors = this.generateSchemeColors(darkScheme);
+
+			// Generate state layers
+			const lightStateLayers = this.generateStateLayers(lightColors);
+			const darkStateLayers = this.generateStateLayers(darkColors);
+
+			// Generate tonal palettes
+			const tonalPalettes = this.generateTonalPalettes(seedArgb, extendedColors);
+
+			// Process extended colors
+			if (extendedColors && extendedColors.length > 0) {
+				this.processExtendedColors(extendedColors, lightColors, darkColors, lightStateLayers, darkStateLayers, tonalPalettes);
+			}
+
+			return {
+				schemes: {
+					light: lightColors,
+					dark: darkColors
+				},
+				stateLayers: {
+					light: lightStateLayers,
+					dark: darkStateLayers
+				},
+				tonalPalettes: tonalPalettes
+			};
+
+		} catch (error) {
+			console.error('Error generating color scheme:', error);
+			throw new Error('Failed to generate color scheme');
+		}
+	}
+
+	/**
+	 * Generate scheme colors for light/dark mode
+	 * @param {DynamicScheme} scheme - Dynamic scheme instance
+	 * @returns {Object} Color scheme object
+	 */
+	generateSchemeColors(scheme) {
+		const colors = {};
+		
+		// Primary colors
+		colors.primary = hexFromArgb(MaterialDynamicColors.primary.getArgb(scheme));
+		colors.onPrimary = hexFromArgb(MaterialDynamicColors.onPrimary.getArgb(scheme));
+		colors.primaryContainer = hexFromArgb(MaterialDynamicColors.primaryContainer.getArgb(scheme));
+		colors.onPrimaryContainer = hexFromArgb(MaterialDynamicColors.onPrimaryContainer.getArgb(scheme));
+
+		// Secondary colors
+		colors.secondary = hexFromArgb(MaterialDynamicColors.secondary.getArgb(scheme));
+		colors.onSecondary = hexFromArgb(MaterialDynamicColors.onSecondary.getArgb(scheme));
+		colors.secondaryContainer = hexFromArgb(MaterialDynamicColors.secondaryContainer.getArgb(scheme));
+		colors.onSecondaryContainer = hexFromArgb(MaterialDynamicColors.onSecondaryContainer.getArgb(scheme));
+
+		// Tertiary colors
+		colors.tertiary = hexFromArgb(MaterialDynamicColors.tertiary.getArgb(scheme));
+		colors.onTertiary = hexFromArgb(MaterialDynamicColors.onTertiary.getArgb(scheme));
+		colors.tertiaryContainer = hexFromArgb(MaterialDynamicColors.tertiaryContainer.getArgb(scheme));
+		colors.onTertiaryContainer = hexFromArgb(MaterialDynamicColors.onTertiaryContainer.getArgb(scheme));
+
+		// Error colors
+		colors.error = hexFromArgb(MaterialDynamicColors.error.getArgb(scheme));
+		colors.onError = hexFromArgb(MaterialDynamicColors.onError.getArgb(scheme));
+		colors.errorContainer = hexFromArgb(MaterialDynamicColors.errorContainer.getArgb(scheme));
+		colors.onErrorContainer = hexFromArgb(MaterialDynamicColors.onErrorContainer.getArgb(scheme));
+
+		// Surface colors
+		colors.surface = hexFromArgb(MaterialDynamicColors.surface.getArgb(scheme));
+		colors.onSurface = hexFromArgb(MaterialDynamicColors.onSurface.getArgb(scheme));
+		colors.surfaceVariant = hexFromArgb(MaterialDynamicColors.surfaceVariant.getArgb(scheme));
+		colors.onSurfaceVariant = hexFromArgb(MaterialDynamicColors.onSurfaceVariant.getArgb(scheme));
+
+		// Additional surface colors
+		colors.surfaceDim = hexFromArgb(MaterialDynamicColors.surfaceDim.getArgb(scheme));
+		colors.surfaceBright = hexFromArgb(MaterialDynamicColors.surfaceBright.getArgb(scheme));
+		colors.surfaceContainerLowest = hexFromArgb(MaterialDynamicColors.surfaceContainerLowest.getArgb(scheme));
+		colors.surfaceContainerLow = hexFromArgb(MaterialDynamicColors.surfaceContainerLow.getArgb(scheme));
+		colors.surfaceContainer = hexFromArgb(MaterialDynamicColors.surfaceContainer.getArgb(scheme));
+		colors.surfaceContainerHigh = hexFromArgb(MaterialDynamicColors.surfaceContainerHigh.getArgb(scheme));
+		colors.surfaceContainerHighest = hexFromArgb(MaterialDynamicColors.surfaceContainerHighest.getArgb(scheme));
+
+		// Outline colors
+		colors.outline = hexFromArgb(MaterialDynamicColors.outline.getArgb(scheme));
+		colors.outlineVariant = hexFromArgb(MaterialDynamicColors.outlineVariant.getArgb(scheme));
+
+		// Fixed colors
+		colors.primaryFixed = hexFromArgb(MaterialDynamicColors.primaryFixed.getArgb(scheme));
+		colors.primaryFixedDim = hexFromArgb(MaterialDynamicColors.primaryFixedDim.getArgb(scheme));
+		colors.onPrimaryFixed = hexFromArgb(MaterialDynamicColors.onPrimaryFixed.getArgb(scheme));
+		colors.onPrimaryFixedVariant = hexFromArgb(MaterialDynamicColors.onPrimaryFixedVariant.getArgb(scheme));
+
+		colors.secondaryFixed = hexFromArgb(MaterialDynamicColors.secondaryFixed.getArgb(scheme));
+		colors.secondaryFixedDim = hexFromArgb(MaterialDynamicColors.secondaryFixedDim.getArgb(scheme));
+		colors.onSecondaryFixed = hexFromArgb(MaterialDynamicColors.onSecondaryFixed.getArgb(scheme));
+		colors.onSecondaryFixedVariant = hexFromArgb(MaterialDynamicColors.onSecondaryFixedVariant.getArgb(scheme));
+
+		colors.tertiaryFixed = hexFromArgb(MaterialDynamicColors.tertiaryFixed.getArgb(scheme));
+		colors.tertiaryFixedDim = hexFromArgb(MaterialDynamicColors.tertiaryFixedDim.getArgb(scheme));
+		colors.onTertiaryFixed = hexFromArgb(MaterialDynamicColors.onTertiaryFixed.getArgb(scheme));
+		colors.onTertiaryFixedVariant = hexFromArgb(MaterialDynamicColors.onTertiaryFixedVariant.getArgb(scheme));
+
+		// Background and scrim
+		colors.background = hexFromArgb(MaterialDynamicColors.background.getArgb(scheme));
+		colors.onBackground = hexFromArgb(MaterialDynamicColors.onBackground.getArgb(scheme));
+		colors.scrim = hexFromArgb(MaterialDynamicColors.scrim.getArgb(scheme));
+		colors.shadow = hexFromArgb(MaterialDynamicColors.shadow.getArgb(scheme));
+
+		// Inverse colors
+		colors.inverseSurface = hexFromArgb(MaterialDynamicColors.inverseSurface.getArgb(scheme));
+		colors.inverseOnSurface = hexFromArgb(MaterialDynamicColors.inverseOnSurface.getArgb(scheme));
+		colors.inversePrimary = hexFromArgb(MaterialDynamicColors.inversePrimary.getArgb(scheme));
+
+		return colors;
+	}
+
+	/**
+	 * Generate state layers with opacity values
+	 * @param {Object} colors - Base colors object
+	 * @returns {Object} State layers with opacity values
+	 */
+	generateStateLayers(colors) {
+		const stateLayers = {};
+		
+		// State layer opacity values according to Material Design 3
+		const opacities = {
+			hover: 0.08,
+			focus: 0.12,
+			pressed: 0.12,
+			dragged: 0.16,
+			disabled: 0.12
+		};
+		
+		// Primary state layers
+		stateLayers.primary = {
+			hover: this.addOpacityToHex(colors.primary, opacities.hover),
+			focus: this.addOpacityToHex(colors.primary, opacities.focus),
+			pressed: this.addOpacityToHex(colors.primary, opacities.pressed),
+			dragged: this.addOpacityToHex(colors.primary, opacities.dragged),
+			disabled: this.addOpacityToHex(colors.primary, opacities.disabled)
+		};
+		
+		// Secondary state layers
+		stateLayers.secondary = {
+			hover: this.addOpacityToHex(colors.secondary, opacities.hover),
+			focus: this.addOpacityToHex(colors.secondary, opacities.focus),
+			pressed: this.addOpacityToHex(colors.secondary, opacities.pressed),
+			dragged: this.addOpacityToHex(colors.secondary, opacities.dragged),
+			disabled: this.addOpacityToHex(colors.secondary, opacities.disabled)
+		};
+		
+		// Tertiary state layers
+		stateLayers.tertiary = {
+			hover: this.addOpacityToHex(colors.tertiary, opacities.hover),
+			focus: this.addOpacityToHex(colors.tertiary, opacities.focus),
+			pressed: this.addOpacityToHex(colors.tertiary, opacities.pressed),
+			dragged: this.addOpacityToHex(colors.tertiary, opacities.dragged),
+			disabled: this.addOpacityToHex(colors.tertiary, opacities.disabled)
+		};
+		
+		// Error state layers
+		stateLayers.error = {
+			hover: this.addOpacityToHex(colors.error, opacities.hover),
+			focus: this.addOpacityToHex(colors.error, opacities.focus),
+			pressed: this.addOpacityToHex(colors.error, opacities.pressed),
+			dragged: this.addOpacityToHex(colors.error, opacities.dragged),
+			disabled: this.addOpacityToHex(colors.error, opacities.disabled)
+		};
+		
+		// Surface state layers (using onSurface color)
+		stateLayers.surface = {
+			hover: this.addOpacityToHex(colors.onSurface, opacities.hover),
+			focus: this.addOpacityToHex(colors.onSurface, opacities.focus),
+			pressed: this.addOpacityToHex(colors.onSurface, opacities.pressed),
+			dragged: this.addOpacityToHex(colors.onSurface, opacities.dragged),
+			disabled: this.addOpacityToHex(colors.onSurface, opacities.disabled)
+		};
+		
+		return stateLayers;
+	}
+
+	/**
+	 * Generate tonal palettes for all color roles
+	 * @param {number} seedArgb - Seed color in ARGB format
+	 * @param {Array} extendedColors - Extended color definitions
+	 * @returns {Object} Tonal palettes object
+	 */
+	generateTonalPalettes(seedArgb, extendedColors = []) {
+		const palettes = {};
+		
+		// Create HCT from seed color
+		const seedHct = Hct.fromInt(seedArgb);
+		
+		// Generate palettes for each color role
+		this.colorRoles.forEach(role => {
+			const palette = TonalPalette.fromHueAndChroma(seedHct.hue, seedHct.chroma);
+			palettes[role] = {};
+			
+			this.tones.forEach(tone => {
+				palettes[role][tone] = hexFromArgb(palette.tone(tone));
+			});
+		});
+		
+		// Add extended color palettes
+		extendedColors.forEach(extendedColor => {
+			if (extendedColor.color && extendedColor.name) {
+				try {
+					const colorName = this.sanitizeColorName(extendedColor.name);
+					const colorArgb = argbFromHex(extendedColor.color);
+					const colorHct = Hct.fromInt(colorArgb);
+					const palette = TonalPalette.fromHueAndChroma(colorHct.hue, colorHct.chroma);
+					
+					palettes[colorName] = {};
+					this.tones.forEach(tone => {
+						palettes[colorName][tone] = hexFromArgb(palette.tone(tone));
+					});
+				} catch (error) {
+					console.warn('Error generating palette for extended color:', extendedColor, error);
+				}
+			}
+		});
+		
+		return palettes;
+	}
+
+	/**
+	 * Process extended colors and add them to schemes and state layers
+	 * @param {Array} extendedColors - Extended color definitions
+	 * @param {Object} lightColors - Light scheme colors
+	 * @param {Object} darkColors - Dark scheme colors
+	 * @param {Object} lightStateLayers - Light state layers
+	 * @param {Object} darkStateLayers - Dark state layers
+	 * @param {Object} tonalPalettes - Tonal palettes
+	 */
+	processExtendedColors(extendedColors, lightColors, darkColors, lightStateLayers, darkStateLayers, tonalPalettes) {
+		extendedColors.forEach(extendedColor => {
+			if (extendedColor.color && extendedColor.name) {
+				try {
+					const colorName = this.sanitizeColorName(extendedColor.name);
+					const baseColor = extendedColor.color;
+					
+					// Add to light scheme
+					lightColors[colorName] = baseColor;
+					lightColors[`on${this.toCamelCase(colorName)}`] = this.calculateOnColor(baseColor, false);
+					lightColors[`${colorName}Container`] = this.lightenColor(baseColor, 0.8);
+					lightColors[`on${this.toCamelCase(colorName)}Container`] = this.calculateOnColor(this.lightenColor(baseColor, 0.8), false);
+					
+					// Add to dark scheme
+					darkColors[colorName] = this.lightenColor(baseColor, 0.3);
+					darkColors[`on${this.toCamelCase(colorName)}`] = this.calculateOnColor(this.lightenColor(baseColor, 0.3), true);
+					darkColors[`${colorName}Container`] = this.darkenColor(baseColor, 0.3);
+					darkColors[`on${this.toCamelCase(colorName)}Container`] = this.calculateOnColor(this.darkenColor(baseColor, 0.3), true);
+					
+					// Add state layers
+					const opacities = { hover: 0.08, focus: 0.12, pressed: 0.12, dragged: 0.16, disabled: 0.12 };
+					
+					lightStateLayers[colorName] = {
+						hover: this.addOpacityToHex(lightColors[colorName], opacities.hover),
+						focus: this.addOpacityToHex(lightColors[colorName], opacities.focus),
+						pressed: this.addOpacityToHex(lightColors[colorName], opacities.pressed),
+						dragged: this.addOpacityToHex(lightColors[colorName], opacities.dragged),
+						disabled: this.addOpacityToHex(lightColors[colorName], opacities.disabled)
+					};
+					
+					darkStateLayers[colorName] = {
+						hover: this.addOpacityToHex(darkColors[colorName], opacities.hover),
+						focus: this.addOpacityToHex(darkColors[colorName], opacities.focus),
+						pressed: this.addOpacityToHex(darkColors[colorName], opacities.pressed),
+						dragged: this.addOpacityToHex(darkColors[colorName], opacities.dragged),
+						disabled: this.addOpacityToHex(darkColors[colorName], opacities.disabled)
+					};
+					
+				} catch (error) {
+					console.warn('Error processing extended color:', extendedColor, error);
+				}
+			}
+		});
+	}
+
+	/**
+	 * Add opacity to hex color
+	 * @param {string} hexColor - Hex color string
+	 * @param {number} opacity - Opacity value (0-1)
+	 * @returns {string} Hex color with alpha channel
+	 */
+	addOpacityToHex(hexColor, opacity) {
+		// Convert opacity to hex (0-255)
+		const alpha = Math.round(opacity * 255);
+		const alphaHex = alpha.toString(16).padStart(2, '0').toUpperCase();
+		
+		// Return hex color with alpha channel
+		return hexColor + alphaHex;
+	}
+
+	/**
+	 * Lighten color by percentage
+	 * @param {string} hexColor - Hex color string
+	 * @param {number} amount - Amount to lighten (0-1)
+	 * @returns {string} Lightened hex color
+	 */
+	lightenColor(hexColor, amount) {
+		const argb = argbFromHex(hexColor);
+		const hct = Hct.fromInt(argb);
+		const newTone = Math.min(100, hct.tone + (amount * 100));
+		const newHct = Hct.from(hct.hue, hct.chroma, newTone);
+		return hexFromArgb(newHct.toInt());
+	}
+
+	/**
+	 * Darken color by percentage
+	 * @param {string} hexColor - Hex color string
+	 * @param {number} amount - Amount to darken (0-1)
+	 * @returns {string} Darkened hex color
+	 */
+	darkenColor(hexColor, amount) {
+		const argb = argbFromHex(hexColor);
+		const hct = Hct.fromInt(argb);
+		const newTone = Math.max(0, hct.tone - (amount * 100));
+		const newHct = Hct.from(hct.hue, hct.chroma, newTone);
+		return hexFromArgb(newHct.toInt());
+	}
+
+	/**
+	 * Calculate appropriate "on" color for given background
+	 * @param {string} backgroundColor - Background hex color
+	 * @param {boolean} isDark - Whether the scheme is dark
+	 * @returns {string} Appropriate "on" color
+	 */
+	calculateOnColor(backgroundColor, isDark) {
+		return isDark ? '#FFFFFF' : '#000000';
+	}
+
+	/**
+	 * Sanitize color name for use as object key while preserving spaces and hyphens
+	 */
+	sanitizeColorName(str) {
+		return str
+			.toLowerCase()
+			.replace(/[^a-zA-Z0-9\-_ ]/g, '') // Keep alphanumeric, hyphens, underscores, and spaces
+			.replace(/^[^a-zA-Z]+/, '') // Remove leading non-letters
+			.trim(); // Remove leading/trailing spaces
+	}
+
+	/**
+	 * Convert string to camelCase
+	 */
+	toCamelCase(str) {
+		return str
+			.toLowerCase()
+			.replace(/[^a-zA-Z0-9]+(.)/g, (match, chr) => chr.toUpperCase())
+			.replace(/^[^a-zA-Z]+/, '');
+	}
+}
