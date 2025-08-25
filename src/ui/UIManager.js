@@ -22,6 +22,7 @@ export class UIManager {
 		this.clearBtn = document.getElementById('clearBtn');
 		this.resultElement = document.getElementById('jsonOutput');
 		this.namingFormatSelect = document.getElementById('namingFormat');
+		this.collectionNameInput = document.getElementById('collectionName');
 		this.stateLayersToggle = document.getElementById('stateLayersToggle');
 		this.tonalPalettesToggle = document.getElementById('tonalPalettesToggle');
 		this.w3cFormatToggle = document.getElementById('w3cFormatToggle');
@@ -79,6 +80,15 @@ export class UIManager {
 			});
 		}
 
+		// Collection name change
+		if (this.collectionNameInput) {
+			this.collectionNameInput.addEventListener('input', () => {
+				if (this.originalResult) {
+					this.onFormatChange?.();
+				}
+			});
+		}
+
 		// Handle state layers toggle
 		if (this.stateLayersToggle) {
 			this.stateLayersToggle.addEventListener('change', () => {
@@ -99,7 +109,13 @@ export class UIManager {
 
 		// Handle W3C format toggle
 		if (this.w3cFormatToggle) {
-			this.w3cFormatToggle.addEventListener('change', () => {
+			// Initial state setup for collection name field visibility
+			this.toggleCollectionNameVisibility(this.w3cFormatToggle.checked);
+			
+			this.w3cFormatToggle.addEventListener('change', (e) => {
+				// Update visibility of collection name field
+				this.toggleCollectionNameVisibility(e.target.checked);
+				
 				if (this.originalResult) {
 					this.onFormatChange?.();
 				}
@@ -147,6 +163,14 @@ export class UIManager {
 	 */
 	getNamingFormat() {
 		return this.namingFormatSelect?.value || 'kebab-case';
+	}
+
+	/**
+	 * Get collection name input value
+	 */
+	getCollectionName() {
+		const val = this.collectionNameInput?.value?.trim();
+		return val || 'Semantic colors';
 	}
 
 	/**
@@ -425,5 +449,20 @@ export class UIManager {
 	isValidHexColor(color) {
 		const hexRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
 		return hexRegex.test(color);
+	}
+	
+	/**
+	 * Toggle visibility of the collection name input based on W3C format state
+	 * @param {boolean} show - Whether to show the collection name input
+	 */
+	toggleCollectionNameVisibility(show) {
+		const collectionNameGroup = document.getElementById('collectionNameGroup');
+		if (collectionNameGroup) {
+			if (show) {
+				collectionNameGroup.classList.remove('d-none');
+			} else {
+				collectionNameGroup.classList.add('d-none');
+			}
+		}
 	}
 }

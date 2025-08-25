@@ -67,6 +67,7 @@ class MaterialColorApp {
 		if (!originalResult) return;
 		
 		const namingFormat = this.uiManager.getNamingFormat();
+		const collectionName = this.uiManager.getCollectionName();
 		const includeStateLayers = this.uiManager.getStateLayersEnabled();
 		const includeTonalPalettes = this.uiManager.getTonalPalettesEnabled();
 		const useW3cFormat = this.uiManager.getW3cFormatEnabled();
@@ -81,8 +82,8 @@ class MaterialColorApp {
 				includeTonalPalettes
 			);
 			
-			// Convert to W3C Design Tokens format
-			const w3cResult = W3cDtcgConverter.convertToW3cDtcgFormat(filteredResult);
+			// Convert to W3C Design Tokens format with dynamic collection name
+			const w3cResult = W3cDtcgConverter.convertToW3cDtcgFormat(filteredResult, collectionName);
 			
 			// Apply naming format to W3C structure, preserving top-level collection name
 			formattedResult = this.transformW3cKeysExceptTopLevel(w3cResult, namingFormat);
