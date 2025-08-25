@@ -13,13 +13,13 @@ export class ColorParser {
 			const params = new URLSearchParams(urlObj.search);
 			
 			// Extract seed color
-			const seedColor = params.get('primary') || '#6750A4';
+			const seedColor = params.get('color_seed') || params.get('primary') || '#6750A4';
 			
 			// Extract style/variant
 			const style = params.get('style') || 'TONAL_SPOT';
 			
 			// Extract color specification
-			const colorSpec = params.get('spec') || 'SPEC_2021';
+			const colorSpec = params.get('color_spec') || 'SPEC_2021';
 			
 			// Extract custom colors (future feature)
 			const customColors = this.parseCustomColors(params);
@@ -45,11 +45,27 @@ export class ColorParser {
 	/**
 	 * Parse custom colors from URL parameters
 	 * @param {URLSearchParams} params - URL search parameters
-	 * @returns {Array} Array of custom color objects
+	 * @returns {Object} Object with custom color role overrides
 	 */
 	parseCustomColors(params) {
-		const customColors = [];
-		// Future implementation for custom colors
+		const customColors = {};
+		
+		// MaterialKolor custom color parameters
+		const colorRoles = [
+			'primary', 'secondary', 'tertiary', 'error', 
+			'neutral', 'neutralvariant'
+		];
+		
+		colorRoles.forEach(role => {
+			const paramName = `color_${role}`;
+			const colorValue = params.get(paramName);
+			
+			if (colorValue) {
+				const normalizedRole = role === 'neutralvariant' ? 'neutralVariant' : role;
+				customColors[normalizedRole] = this.validateHexColor(colorValue);
+			}
+		});
+		
 		return customColors;
 	}
 	
@@ -68,15 +84,17 @@ export class ColorParser {
 		}
 		
 		// Validate hex format
-		const hexRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+		const hexRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3}|[A-Fa-f0-9]{8})$/;
 		if (!hexRegex.test(color)) {
 			console.warn('Invalid hex color:', color, 'Using default');
 			return '#6750A4';
 		}
-		
-		// Convert 3-digit to 6-digit hex
-		if (color.length === 4) {
-			color = '#' + color[1] + color[1] + color[2] + color[2] + color[3] + color[3];
+
+		// For 8-digit hex (ARGB format), convert to RGB by removing alpha channel
+		if (color.length === 9) {
+			// MaterialKolor uses ARGB format: #AARRGGBB
+			// Extract RGB part (skip first 2 alpha digits)
+			color = '#' + color.substring(3);
 		}
 		
 		return color.toUpperCase();

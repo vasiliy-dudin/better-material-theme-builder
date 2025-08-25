@@ -52,23 +52,10 @@ export class ColorGeneratorService {
 			// Determine specification
 			const specVersion = colorSpec === 'SPEC_2025' ? SpecVersion.SPEC_2025 : SpecVersion.SPEC_2021;
 
-			// Create dynamic scheme variants
+			// Create dynamic scheme variants with custom color overrides
 			const variant = this.styleMapping[style] || Variant.TONAL_SPOT;
-			const lightScheme = new DynamicScheme({
-				sourceColorHct: seedHct,
-				variant: variant,
-				isDark: false,
-				contrastLevel: 0.0,
-				specVersion: specVersion
-			});
-
-			const darkScheme = new DynamicScheme({
-				sourceColorHct: seedHct,
-				variant: variant,
-				isDark: true,
-				contrastLevel: 0.0,
-				specVersion: specVersion
-			});
+			const lightScheme = this.createCustomDynamicScheme(seedHct, variant, false, specVersion, customColors);
+			const darkScheme = this.createCustomDynamicScheme(seedHct, variant, true, specVersion, customColors);
 
 			// Generate color schemes
 			const lightColors = this.generateSchemeColors(lightScheme);
@@ -102,6 +89,54 @@ export class ColorGeneratorService {
 			console.error('Error generating color scheme:', error);
 			throw new Error('Failed to generate color scheme');
 		}
+	}
+
+	/**
+	 * Create DynamicScheme with custom color role overrides
+	 * @param {Hct} sourceColorHct - Source color in HCT format
+	 * @param {number} variant - Color variant 
+	 * @param {boolean} isDark - Whether scheme is dark
+	 * @param {number} specVersion - Specification version
+	 * @param {Object} customColors - Custom color role overrides
+	 * @returns {DynamicScheme} Dynamic scheme with custom overrides
+	 */
+	createCustomDynamicScheme(sourceColorHct, variant, isDark, specVersion, customColors = {}) {
+		const schemeOptions = {
+			sourceColorHct: sourceColorHct,
+			variant: variant,
+			isDark: isDark,
+			contrastLevel: 0.0,
+			specVersion: specVersion
+		};
+
+		// Add custom palettes if they exist
+		if (customColors.primary) {
+			const primaryHct = Hct.fromInt(argbFromHex(customColors.primary));
+			schemeOptions.primaryPalette = TonalPalette.fromHueAndChroma(primaryHct.hue, primaryHct.chroma);
+		}
+		if (customColors.secondary) {
+			const secondaryHct = Hct.fromInt(argbFromHex(customColors.secondary));
+			schemeOptions.secondaryPalette = TonalPalette.fromHueAndChroma(secondaryHct.hue, secondaryHct.chroma);
+		}
+		if (customColors.tertiary) {
+			const tertiaryHct = Hct.fromInt(argbFromHex(customColors.tertiary));
+			schemeOptions.tertiaryPalette = TonalPalette.fromHueAndChroma(tertiaryHct.hue, tertiaryHct.chroma);
+		}
+		if (customColors.error) {
+			const errorHct = Hct.fromInt(argbFromHex(customColors.error));
+			schemeOptions.errorPalette = TonalPalette.fromHueAndChroma(errorHct.hue, errorHct.chroma);
+		}
+		if (customColors.neutral) {
+			const neutralHct = Hct.fromInt(argbFromHex(customColors.neutral));
+			schemeOptions.neutralPalette = TonalPalette.fromHueAndChroma(neutralHct.hue, neutralHct.chroma);
+		}
+		if (customColors.neutralVariant) {
+			const neutralVariantHct = Hct.fromInt(argbFromHex(customColors.neutralVariant));
+			schemeOptions.neutralVariantPalette = TonalPalette.fromHueAndChroma(neutralVariantHct.hue, neutralVariantHct.chroma);
+		}
+		
+
+		return new DynamicScheme(schemeOptions);
 	}
 
 	/**
