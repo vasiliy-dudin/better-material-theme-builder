@@ -351,6 +351,9 @@ export class UIManager {
 		
 		this.extendedColorsContainer.appendChild(colorDiv);
 		this.bindExtendedColorEvents(colorDiv, colorId);
+		
+		// Trigger JSON update when new extended color is added
+		this.onExtendedColorsUpdate?.();
 	}
 
 	/**
