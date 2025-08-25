@@ -24,17 +24,24 @@ export class UIManager {
 		this.seedColorInput = document.getElementById('seedColorInput');
 		this.seedColorPreview = document.getElementById('seedColorPreview');
 		this.seedColorDropdown = document.getElementById('seedColorDropdown');
-		this.styleSelect = document.getElementById('styleSelect');
-		this.specSelect = document.getElementById('specSelect');
+		this.styleChips = document.getElementById('styleChips');
+		this.specChips = document.getElementById('specChips');
 		
-		// Action buttons
-		this.generateBtn = document.getElementById('generateBtn');
-		this.clearBtn = document.getElementById('clearBtn');
 		
 		// Result elements
 		this.copyBtn = document.getElementById('copyBtn');
 		this.downloadBtn = document.getElementById('downloadBtn');
 		this.resultElement = document.getElementById('jsonOutput');
+		
+		// Drawer elements
+		this.getJsonBtn = document.getElementById('getJsonBtn');
+		this.jsonDrawer = document.getElementById('jsonDrawer');
+		this.closeDrawerBtn = document.getElementById('closeDrawerBtn');
+		this.drawerBackdrop = document.getElementById('drawerBackdrop');
+		
+		// Track current selections
+		this.currentStyle = 'TONAL_SPOT';
+		this.currentSpec = 'SPEC_2025';
 		
 		// Format options
 		this.namingFormatSelect = document.getElementById('namingFormat');
@@ -52,12 +59,6 @@ export class UIManager {
 	 * Bind event listeners
 	 */
 	bindEvents() {
-		// Generate button
-		if (this.generateBtn) {
-			this.generateBtn.addEventListener('click', () => {
-				this.onGenerate?.();
-			});
-		}
 
 		// Copy button
 		if (this.copyBtn) {
@@ -73,66 +74,41 @@ export class UIManager {
 			});
 		}
 
-		// Clear button
-		if (this.clearBtn) {
-			this.clearBtn.addEventListener('click', () => {
-				this.clearInput();
-			});
-		}
 
 		// Seed color picker setup
 		this.bindSeedColorEvents();
 		
-		// Style and spec selectors
-		if (this.styleSelect) {
-			this.styleSelect.addEventListener('change', () => {
-				if (this.originalResult) {
-					this.onGenerate?.();
-				}
-			});
-		}
-		
-		if (this.specSelect) {
-			this.specSelect.addEventListener('change', () => {
-				if (this.originalResult) {
-					this.onGenerate?.();
-				}
-			});
-		}
+		// Chip selectors
+		this.bindChipEvents();
 
-		// Format change events
+		// Drawer controls
+		this.bindDrawerEvents();
+
+		// Format change events - now triggers instant updates
 		if (this.namingFormatSelect) {
 			this.namingFormatSelect.addEventListener('change', () => {
-				if (this.originalResult) {
-					this.onFormatChange?.();
-				}
+				this.onFormatChange?.();
 			});
 		}
 
-		// Collection name change
+		// Collection name change - now triggers instant updates
 		if (this.collectionNameInput) {
 			this.collectionNameInput.addEventListener('input', () => {
-				if (this.originalResult) {
-					this.onFormatChange?.();
-				}
+				this.onFormatChange?.();
 			});
 		}
 
-		// Handle state layers toggle
+		// Handle state layers toggle - now triggers instant updates
 		if (this.stateLayersToggle) {
 			this.stateLayersToggle.addEventListener('change', () => {
-				if (this.originalResult) {
-					this.onFormatChange?.();
-				}
+				this.onFormatChange?.();
 			});
 		}
 
-		// Handle tonal palettes toggle
+		// Handle tonal palettes toggle - now triggers instant updates
 		if (this.tonalPalettesToggle) {
 			this.tonalPalettesToggle.addEventListener('change', () => {
-				if (this.originalResult) {
-					this.onFormatChange?.();
-				}
+				this.onFormatChange?.();
 			});
 		}
 
@@ -145,9 +121,7 @@ export class UIManager {
 				// Update visibility of collection name field
 				this.toggleCollectionNameVisibility(e.target.checked);
 				
-				if (this.originalResult) {
-					this.onFormatChange?.();
-				}
+				this.onFormatChange?.();
 			});
 		}
 
@@ -191,14 +165,14 @@ export class UIManager {
 	 * Get selected style value
 	 */
 	getStyle() {
-		return this.styleSelect?.value || 'TONAL_SPOT';
+		return this.currentStyle || 'TONAL_SPOT';
 	}
 	
 	/**
 	 * Get selected color specification
 	 */
 	getColorSpec() {
-		return this.specSelect?.value || 'SPEC_2021';
+		return this.currentSpec || 'SPEC_2025';
 	}
 	
 	/**
@@ -272,17 +246,10 @@ export class UIManager {
 	}
 
 	/**
-	 * Enable copy and download buttons
+	 * Enable copy and download buttons (no longer needed for panel control)
 	 */
 	enableButtons() {
-		if (this.copyBtn) this.copyBtn.disabled = false;
-		if (this.downloadBtn) this.downloadBtn.disabled = false;
-		
-		// Enable result panel when there's content
-		const resultPanel = document.getElementById('resultPanel');
-		if (resultPanel) {
-			resultPanel.classList.remove('panel-disabled');
-		}
+		// Buttons are always enabled now
 	}
 
 	/**
@@ -328,13 +295,17 @@ export class UIManager {
 	}
 
 	/**
-	 * Clear input and results
+	 * Clear input and results (method kept for compatibility, but not used)
 	 */
 	clearInput() {
 		// Reset color configuration to defaults
 		if (this.seedColorInput) this.seedColorInput.value = '#6750A4';
-		if (this.styleSelect) this.styleSelect.value = 'TONAL_SPOT';
-		if (this.specSelect) this.specSelect.value = 'SPEC_2021';
+		this.currentStyle = 'TONAL_SPOT';
+		this.currentSpec = 'SPEC_2021';
+		
+		// Update chip selections
+		this.updateChipSelection('styleChips', 'TONAL_SPOT');
+		this.updateChipSelection('specChips', 'SPEC_2021');
 		
 		// Update seed color preview
 		if (this.seedColorPreview) {
@@ -344,14 +315,6 @@ export class UIManager {
 		
 		// Clear results
 		if (this.resultElement) this.resultElement.textContent = '';
-		if (this.copyBtn) this.copyBtn.disabled = true;
-		if (this.downloadBtn) this.downloadBtn.disabled = true;
-		
-		// Disable result panel when clearing
-		const resultPanel = document.getElementById('resultPanel');
-		if (resultPanel) {
-			resultPanel.classList.add('panel-disabled');
-		}
 		
 		this.originalResult = null;
 		this.clearExtendedColors();
@@ -501,13 +464,114 @@ export class UIManager {
 			colorDropdown: this.seedColorDropdown,
 			initialColor: '#6750A4',
 			onChange: () => {
-				if (this.originalResult) {
-					this.onGenerate?.();
-				}
+				this.onGenerate?.();
 			},
 			logPrefix: 'Seed color picker'
 		};
 		
 		this.colorPickerManager.setupColorPicker(config);
+	}
+	
+	/**
+	 * Bind chip events for style and spec selection
+	 */
+	bindChipEvents() {
+		// Style chips
+		if (this.styleChips) {
+			this.styleChips.addEventListener('click', (e) => {
+				if (e.target.classList.contains('chip')) {
+					const value = e.target.getAttribute('data-value');
+					if (value) {
+						this.currentStyle = value;
+						this.updateChipSelection('styleChips', value);
+						this.onGenerate?.();
+					}
+				}
+			});
+		}
+		
+		// Spec chips
+		if (this.specChips) {
+			this.specChips.addEventListener('click', (e) => {
+				if (e.target.classList.contains('chip')) {
+					const value = e.target.getAttribute('data-value');
+					if (value) {
+						this.currentSpec = value;
+						this.updateChipSelection('specChips', value);
+						this.onGenerate?.();
+					}
+				}
+			});
+		}
+	}
+	
+	/**
+	 * Update chip selection state
+	 */
+	updateChipSelection(containerId, activeValue) {
+		const container = document.getElementById(containerId);
+		if (!container) return;
+		
+		const chips = container.querySelectorAll('.chip');
+		chips.forEach(chip => {
+			if (chip.getAttribute('data-value') === activeValue) {
+				chip.classList.add('active');
+			} else {
+				chip.classList.remove('active');
+			}
+		});
+	}
+	
+	/**
+	 * Bind drawer events
+	 */
+	bindDrawerEvents() {
+		// Get JSON button - opens drawer
+		if (this.getJsonBtn) {
+			this.getJsonBtn.addEventListener('click', () => {
+				this.openDrawer();
+			});
+		}
+		
+		// Close drawer button
+		if (this.closeDrawerBtn) {
+			this.closeDrawerBtn.addEventListener('click', () => {
+				this.closeDrawer();
+			});
+		}
+		
+		// Backdrop functionality removed - drawer no longer modal
+		
+		// Escape key to close
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' && this.jsonDrawer?.classList.contains('open')) {
+				this.closeDrawer();
+			}
+		});
+	}
+	
+	/**
+	 * Open the JSON drawer
+	 */
+	openDrawer() {
+		// Generate JSON if not already done
+		if (!this.originalResult) {
+			this.onGenerate?.();
+		}
+		
+		if (this.jsonDrawer) {
+			this.jsonDrawer.classList.add('open');
+		}
+		// No backdrop or body scroll blocking - drawer is not modal
+	}
+	
+	/**
+	 * Close the JSON drawer
+	 */
+	closeDrawer() {
+		if (this.jsonDrawer) {
+			this.jsonDrawer.classList.remove('open');
+		}
+		// No backdrop or body scroll restoration needed
 	}
 }

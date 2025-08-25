@@ -164,3 +164,144 @@ footer a:hover {
 	width: auto;
 	max-width: 256px;
 }
+
+/* Chip styles */
+.chip-container {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.chip {
+	background: #f8f9fa;
+	border: 1px solid #dee2e6;
+	border-radius: 20px;
+	padding: 6px 16px;
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: #495057;
+	cursor: pointer;
+	transition: background-color 0.2s ease, border-color 0.2s ease;
+	white-space: nowrap;
+}
+
+.chip:hover {
+	background: #e9ecef;
+	border-color: #adb5bd;
+}
+
+.chip.active {
+	background: rgba(103, 80, 164, 0.9);
+	border-color: rgba(103, 80, 164, 1);
+	color: white;
+}
+
+.chip.active:hover {
+	background: rgba(103, 80, 164, 1);
+}
+
+/* Get JSON Button */
+.get-json-btn {
+	position: fixed;
+	bottom: 32px;
+	right: 32px;
+	background: rgba(103, 80, 164, 0.9);
+	border: none;
+	border-radius: 50px;
+	padding: 16px 24px;
+	color: white;
+	font-weight: 600;
+	font-size: 1rem;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	cursor: pointer;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+	-webkit-backdrop-filter: blur(20px);
+	backdrop-filter: blur(20px);
+	transition: all 0.3s ease;
+	z-index: 998;
+}
+
+.get-json-btn:hover {
+	background: rgba(103, 80, 164, 1);
+	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+
+/* JSON Drawer */
+.json-drawer {
+	position: fixed;
+	top: 0;
+	right: -600px;
+	width: 600px;
+	height: 100vh;
+	background: rgba(255, 255, 255, 0.95);
+	-webkit-backdrop-filter: blur(20px);
+	backdrop-filter: blur(20px);
+	border-left: 1px solid rgba(255, 255, 255, 0.3);
+	box-shadow: -8px 0 32px rgba(0, 0, 0, 0.1);
+	transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+	z-index: 999;
+	display: flex;
+	flex-direction: column;
+}
+
+.json-drawer.open {
+	right: 0;
+}
+
+.drawer-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 24px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+	-webkit-backdrop-filter: blur(20px);
+	backdrop-filter: blur(20px);
+}
+
+.drawer-header h3 {
+	margin: 0;
+	color: #333;
+}
+
+.close-drawer-btn {
+	background: none;
+	border: none;
+	color: #666;
+	cursor: pointer;
+	padding: 8px;
+	border-radius: 8px;
+	transition: all 0.2s ease;
+}
+
+.close-drawer-btn:hover {
+	background: rgba(0, 0, 0, 0.1);
+	color: #333;
+}
+
+.drawer-content {
+	flex: 1;
+	padding: 24px;
+	overflow-y: auto;
+}
+
+.drawer-backdrop {
+	display: none;
+}
+
+/* Responsive drawer */
+@media (max-width: 768px) {
+	.json-drawer {
+		width: 100vw;
+		right: -100vw;
+	}
+	
+	.get-json-btn {
+		bottom: 20px;
+		right: 20px;
+		padding: 12px 20px;
+		font-size: 0.9rem;
+	}
+}

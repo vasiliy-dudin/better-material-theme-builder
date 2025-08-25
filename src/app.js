@@ -18,6 +18,9 @@ class MaterialColorApp {
 
 		// Bind UI callbacks
 		this.bindUICallbacks();
+		
+		// Generate initial result on page load
+		this.handleGenerate();
 	}
 
 	/**
@@ -60,7 +63,11 @@ class MaterialColorApp {
 	 */
 	updateResultFormat() {
 		const originalResult = this.uiManager.getOriginalResult();
-		if (!originalResult) return;
+		if (!originalResult) {
+			// If no result exists yet, generate one first
+			this.handleGenerate();
+			return;
+		}
 		
 		const namingFormat = this.uiManager.getNamingFormat();
 		const collectionName = this.uiManager.getCollectionName();
@@ -117,9 +124,7 @@ class MaterialColorApp {
 	 * Regenerate color scheme with current extended colors
 	 */
 	async regenerateWithExtendedColors() {
-		if (!this.uiManager.getOriginalResult()) {
-			return;
-		}
+		// Always regenerate, don't check for existing result
 
 		try {
 			// Get color configuration from UI
