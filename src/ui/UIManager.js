@@ -1,3 +1,5 @@
+import { ColorPickerManager } from './ColorPickerManager.js';
+
 /**
  * UI Manager for handling DOM interactions and user input
  */
@@ -5,6 +7,9 @@ export class UIManager {
 	constructor() {
 		// Store reference to original result for format changes
 		this.originalResult = null;
+		
+		// Initialize color picker manager
+		this.colorPickerManager = new ColorPickerManager();
 		
 		// Initialize UI elements
 		this.initializeElements();
@@ -15,17 +20,30 @@ export class UIManager {
 	 * Initialize DOM element references
 	 */
 	initializeElements() {
-		this.urlInput = document.getElementById('urlInput');
+		// Color configuration elements
+		this.seedColorInput = document.getElementById('seedColorInput');
+		this.seedColorPreview = document.getElementById('seedColorPreview');
+		this.seedColorDropdown = document.getElementById('seedColorDropdown');
+		this.styleSelect = document.getElementById('styleSelect');
+		this.specSelect = document.getElementById('specSelect');
+		
+		// Action buttons
 		this.generateBtn = document.getElementById('generateBtn');
+		this.clearBtn = document.getElementById('clearBtn');
+		
+		// Result elements
 		this.copyBtn = document.getElementById('copyBtn');
 		this.downloadBtn = document.getElementById('downloadBtn');
-		this.clearBtn = document.getElementById('clearBtn');
 		this.resultElement = document.getElementById('jsonOutput');
+		
+		// Format options
 		this.namingFormatSelect = document.getElementById('namingFormat');
 		this.collectionNameInput = document.getElementById('collectionName');
 		this.stateLayersToggle = document.getElementById('stateLayersToggle');
 		this.tonalPalettesToggle = document.getElementById('tonalPalettesToggle');
 		this.w3cFormatToggle = document.getElementById('w3cFormatToggle');
+		
+		// Extended colors
 		this.addColorBtn = document.getElementById('addColorBtn');
 		this.extendedColorsContainer = document.getElementById('extendedColorsContainer');
 	}
@@ -62,10 +80,21 @@ export class UIManager {
 			});
 		}
 
-		// URL input enter key
-		if (this.urlInput) {
-			this.urlInput.addEventListener('keypress', (e) => {
-				if (e.key === 'Enter') {
+		// Seed color picker setup
+		this.bindSeedColorEvents();
+		
+		// Style and spec selectors
+		if (this.styleSelect) {
+			this.styleSelect.addEventListener('change', () => {
+				if (this.originalResult) {
+					this.onGenerate?.();
+				}
+			});
+		}
+		
+		if (this.specSelect) {
+			this.specSelect.addEventListener('change', () => {
+				if (this.originalResult) {
 					this.onGenerate?.();
 				}
 			});
@@ -152,10 +181,36 @@ export class UIManager {
 	}
 
 	/**
-	 * Get URL input value
+	 * Get seed color value
 	 */
-	getUrlValue() {
-		return this.urlInput?.value?.trim() || '';
+	getSeedColor() {
+		return this.seedColorInput?.value?.trim() || '#6750A4';
+	}
+	
+	/**
+	 * Get selected style value
+	 */
+	getStyle() {
+		return this.styleSelect?.value || 'TONAL_SPOT';
+	}
+	
+	/**
+	 * Get selected color specification
+	 */
+	getColorSpec() {
+		return this.specSelect?.value || 'SPEC_2021';
+	}
+	
+	/**
+	 * Get all color configuration settings
+	 */
+	getColorSettings() {
+		return {
+			seedColor: this.getSeedColor(),
+			style: this.getStyle(),
+			colorSpec: this.getColorSpec(),
+			customColors: {} // Will be populated with role-specific colors later
+		};
 	}
 
 	/**
@@ -276,7 +331,18 @@ export class UIManager {
 	 * Clear input and results
 	 */
 	clearInput() {
-		if (this.urlInput) this.urlInput.value = '';
+		// Reset color configuration to defaults
+		if (this.seedColorInput) this.seedColorInput.value = '#6750A4';
+		if (this.styleSelect) this.styleSelect.value = 'TONAL_SPOT';
+		if (this.specSelect) this.specSelect.value = 'SPEC_2021';
+		
+		// Update seed color preview
+		if (this.seedColorPreview) {
+			const container = this.seedColorPreview.parentElement;
+			container.style.setProperty('--preview-color', '#6750A4');
+		}
+		
+		// Clear results
 		if (this.resultElement) this.resultElement.textContent = '';
 		if (this.copyBtn) this.copyBtn.disabled = true;
 		if (this.downloadBtn) this.downloadBtn.disabled = true;
@@ -350,65 +416,19 @@ export class UIManager {
 
 		// Color picker setup
 		if (colorPicker && colorPreview) {
-			// Set initial color
-			colorPicker.color = '#6750A4';
-			colorDiv.querySelector('.color-picker-container').style.setProperty('--preview-color', '#6750A4');
-			hexInput.value = '#6750A4';
-
-			// Color picker changes
-			colorPicker.addEventListener('color-changed', (e) => {
-				const color = e.detail.color.toString({ format: 'hex' });
-				const container = colorDiv.querySelector('.color-picker-container');
-				container.style.setProperty('--preview-color', color);
-				hexInput.value = color;
-				this.onExtendedColorsUpdate?.();
-			});
-
-			// Also listen for input and change events as backup
-			['input', 'change'].forEach(eventType => {
-				colorPicker.addEventListener(eventType, (e) => {
-					try {
-						const color = colorPicker.color ? colorPicker.color.toString({ format: 'hex' }) : colorPicker.value;
-						if (color) {
-							const container = colorDiv.querySelector('.color-picker-container');
-							container.style.setProperty('--preview-color', color);
-							hexInput.value = color;
-							this.onExtendedColorsUpdate?.();
-						}
-					} catch (error) {
-						console.log('Color picker event error:', error);
-					}
-				});
-			});
-
-			// Hex input changes
-			hexInput.addEventListener('input', (e) => {
-				const color = e.target.value;
-				if (this.isValidHexColor(color)) {
-					colorPicker.color = color;
-					const container = colorDiv.querySelector('.color-picker-container');
-					container.style.setProperty('--preview-color', color);
-				}
-			});
-
-			// Color preview click to toggle dropdown
-			colorPreview.addEventListener('click', () => {
-				// Close other dropdowns first
-				document.querySelectorAll('.color-dropdown').forEach(dropdown => {
-					if (dropdown !== colorDropdown) {
-						dropdown.classList.remove('show');
-					}
-				});
-				
-				colorDropdown.classList.toggle('show');
-			});
-
-			// Close dropdown when clicking outside
-			document.addEventListener('click', (e) => {
-				if (!colorDiv.contains(e.target)) {
-					colorDropdown.classList.remove('show');
-				}
-			});
+			const config = {
+				colorPicker,
+				colorInput: hexInput,
+				colorPreview,
+				colorDropdown,
+				initialColor: '#6750A4',
+				onChange: () => {
+					this.onExtendedColorsUpdate?.();
+				},
+				logPrefix: 'Extended color picker'
+			};
+			
+			this.colorPickerManager.setupColorPicker(config);
 		}
 	}
 
@@ -447,8 +467,7 @@ export class UIManager {
 	 * Validate hex color format
 	 */
 	isValidHexColor(color) {
-		const hexRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
-		return hexRegex.test(color);
+		return this.colorPickerManager.isValidHexColor(color);
 	}
 	
 	/**
@@ -464,5 +483,31 @@ export class UIManager {
 				collectionNameGroup.classList.add('d-none');
 			}
 		}
+	}
+	
+	/**
+	 * Bind seed color picker events
+	 */
+	bindSeedColorEvents() {
+		if (!this.seedColorInput || !this.seedColorPreview || !this.seedColorDropdown) return;
+		
+		const colorPicker = this.seedColorDropdown.querySelector('color-picker');
+		if (!colorPicker) return;
+		
+		const config = {
+			colorPicker,
+			colorInput: this.seedColorInput,
+			colorPreview: this.seedColorPreview,
+			colorDropdown: this.seedColorDropdown,
+			initialColor: '#6750A4',
+			onChange: () => {
+				if (this.originalResult) {
+					this.onGenerate?.();
+				}
+			},
+			logPrefix: 'Seed color picker'
+		};
+		
+		this.colorPickerManager.setupColorPicker(config);
 	}
 }

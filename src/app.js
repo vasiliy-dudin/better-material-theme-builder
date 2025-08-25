@@ -1,4 +1,4 @@
-import { ColorParser } from './core/ColorParser.js';
+import { DataBuilder } from './core/DataBuilder.js';
 import { ColorGeneratorService } from './services/ColorGeneratorService.js';
 import { UIManager } from './ui/UIManager.js';
 import { FormatUtils } from './utils/FormatUtils.js';
@@ -11,7 +11,7 @@ import { W3cDtcgConverter } from './formatters/W3cDtcgConverter.js';
 class MaterialColorApp {
 	constructor() {
 		// Initialize core services
-		this.colorParser = new ColorParser();
+		this.dataBuilder = new DataBuilder();
 		this.colorGenerator = new ColorGeneratorService();
 		this.uiManager = new UIManager();
 		this.formatUtils = new FormatUtils();
@@ -33,17 +33,13 @@ class MaterialColorApp {
 	 * Handle generate button click
 	 */
 	async handleGenerate() {
-		const url = this.uiManager.getUrlValue();
-		if (!url) {
-			return;
-		}
-
 		try {
-			// Get extended colors from UI
+			// Get color configuration from UI
+			const colorSettings = this.uiManager.getColorSettings();
 			const extendedColors = this.uiManager.getExtendedColors();
 
-			// Parse the URL
-			const parsedData = this.colorParser.parseUrl(url);
+			// Build data from UI inputs
+			const parsedData = this.dataBuilder.buildFromUI(colorSettings);
 
 			// Generate color scheme
 			const result = await this.colorGenerator.generateColorScheme(parsedData, extendedColors);
@@ -125,17 +121,13 @@ class MaterialColorApp {
 			return;
 		}
 
-		const url = this.uiManager.getUrlValue();
-		if (!url) {
-			return;
-		}
-
 		try {
-			// Get extended colors from UI
+			// Get color configuration from UI
+			const colorSettings = this.uiManager.getColorSettings();
 			const extendedColors = this.uiManager.getExtendedColors();
 
-			// Parse the URL
-			const parsedData = this.colorParser.parseUrl(url);
+			// Build data from UI inputs
+			const parsedData = this.dataBuilder.buildFromUI(colorSettings);
 
 			// Generate color scheme
 			const result = await this.colorGenerator.generateColorScheme(parsedData, extendedColors);
