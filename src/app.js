@@ -4,32 +4,42 @@ import { UIManager } from './ui/UIManager.js';
 import { FormatUtils } from './utils/FormatUtils.js';
 import { W3cDtcgConverter } from './formatters/W3cDtcgConverter.js';
 
+// Import Material Color Utilities for core color defaults
+import { argbFromHex, Hct, SpecVersion, Variant } from '@materialx/material-color-utilities';
+
 /**
  * Main application controller for Material Color Generator
  * Coordinates between UI, services, and formatters
  */
 class MaterialColorApp {
 	constructor() {
-		// Initialize core services
-		this.dataBuilder = new DataBuilder();
+		// Initialize services
 		this.colorGenerator = new ColorGeneratorService();
-		this.uiManager = new UIManager();
 		this.formatUtils = new FormatUtils();
-
-		// Bind UI callbacks
-		this.bindUICallbacks();
+		this.dataBuilder = new DataBuilder();
+		this.w3cConverter = new W3cDtcgConverter();
 		
-		// Generate initial result on page load
-		this.handleGenerate();
+		// Initialize UI Manager
+		this.uiManager = new UIManager();
+
+		// Initialize asynchronously
+		this.initialize();
 	}
 
 	/**
-	 * Bind UI callbacks to application logic
+	 * Async initialization after constructor
 	 */
-	bindUICallbacks() {
-		this.uiManager.setGenerateCallback(() => this.handleGenerate());
-		this.uiManager.setFormatChangeCallback(() => this.updateResultFormat());
+	async initialize() {
+		// Initialize UI Manager asynchronously 
+		await this.uiManager.initialize();
+
+		// Set up callbacks
+		this.uiManager.setGenerateCallback(() => this.regenerateWithExtendedColors());
 		this.uiManager.setExtendedColorsUpdateCallback(() => this.regenerateWithExtendedColors());
+		this.uiManager.setFormatChangeCallback(() => this.updateResultFormat());
+		
+		// Initial generation
+		this.regenerateWithExtendedColors();
 	}
 
 	/**
@@ -43,6 +53,9 @@ class MaterialColorApp {
 
 			// Build data from UI inputs
 			const parsedData = this.dataBuilder.buildFromUI(colorSettings);
+
+			// Update default core colors in UI when seed color or style changes
+			this.updateDefaultCoreColors(parsedData);
 
 			// Generate color scheme
 			const result = await this.colorGenerator.generateColorScheme(parsedData, extendedColors);
@@ -121,6 +134,33 @@ class MaterialColorApp {
 	}
 
 	/**
+	 * Update default core colors in UI
+	 */
+	updateDefaultCoreColors(parsedData) {
+		try {
+			const { seedColor, style, colorSpec } = parsedData;
+			
+			// Use imported Material Color Utilities classes
+
+			// Convert seed color to HCT
+			const seedArgb = argbFromHex(seedColor);
+			const seedHct = Hct.fromInt(seedArgb);
+			
+			// Get variant and spec
+			const variant = this.colorGenerator.styleMapping[style] || Variant.TONAL_SPOT;
+			const specVersion = colorSpec === 'SPEC_2025' ? SpecVersion.SPEC_2025 : SpecVersion.SPEC_2021;
+			
+			// Get default colors for current scheme
+			const defaultColors = this.colorGenerator.getDefaultCoreColors(seedHct, variant, specVersion);
+			
+			// Update UI with default colors
+			this.uiManager.updateDefaultCoreColors(defaultColors);
+		} catch (error) {
+			console.warn('Could not update default core colors:', error);
+		}
+	}
+
+	/**
 	 * Regenerate color scheme with current extended colors
 	 */
 	async regenerateWithExtendedColors() {
@@ -133,6 +173,9 @@ class MaterialColorApp {
 
 			// Build data from UI inputs
 			const parsedData = this.dataBuilder.buildFromUI(colorSettings);
+
+			// Update default core colors in UI when seed color or style changes
+			this.updateDefaultCoreColors(parsedData);
 
 			// Generate color scheme
 			const result = await this.colorGenerator.generateColorScheme(parsedData, extendedColors);

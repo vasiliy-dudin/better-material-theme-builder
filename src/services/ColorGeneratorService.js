@@ -43,7 +43,7 @@ export class ColorGeneratorService {
 	 */
 	async generateColorScheme(parsedData, extendedColors = []) {
 		try {
-			const { seedColor, style, colorSpec, customColors } = parsedData;
+			const { seedColor, style, colorSpec, customCoreColors } = parsedData;
 
 			// Convert seed colour to ARGB and HCT
 			const seedArgb = argbFromHex(seedColor);
@@ -54,8 +54,8 @@ export class ColorGeneratorService {
 
 			// Create dynamic scheme variants with custom color overrides
 			const variant = this.styleMapping[style] || Variant.TONAL_SPOT;
-			const lightScheme = this.createCustomDynamicScheme(seedHct, variant, false, specVersion, customColors);
-			const darkScheme = this.createCustomDynamicScheme(seedHct, variant, true, specVersion, customColors);
+			const lightScheme = this.createCustomDynamicScheme(seedHct, variant, false, specVersion, customCoreColors);
+			const darkScheme = this.createCustomDynamicScheme(seedHct, variant, true, specVersion, customCoreColors);
 
 			// Generate color schemes
 			const lightColors = this.generateSchemeColors(lightScheme);
@@ -65,8 +65,8 @@ export class ColorGeneratorService {
 			const lightStateLayers = this.generateStateLayers(lightColors);
 			const darkStateLayers = this.generateStateLayers(darkColors);
 
-			// Generate tonal palettes
-			const tonalPalettes = this.generateTonalPalettes(seedArgb, extendedColors);
+			// Generate tonal palettes with custom core colors support
+			const tonalPalettes = this.generateTonalPalettes(seedArgb, extendedColors, customCoreColors);
 
 			// Process extended colors
 			if (extendedColors && extendedColors.length > 0) {
@@ -289,9 +289,10 @@ export class ColorGeneratorService {
 	 * Generate tonal palettes for all color roles
 	 * @param {number} seedArgb - Seed color in ARGB format
 	 * @param {Array} extendedColors - Extended color definitions
+	 * @param {Object} customCoreColors - Custom core color overrides
 	 * @returns {Object} Tonal palettes object
 	 */
-	generateTonalPalettes(seedArgb, extendedColors = []) {
+	generateTonalPalettes(seedArgb, extendedColors = [], customCoreColors = {}) {
 		const palettes = {};
 		
 		// Create HCT from seed color
@@ -299,9 +300,18 @@ export class ColorGeneratorService {
 		
 		// Generate palettes for each color role
 		this.colorRoles.forEach(role => {
-			const palette = TonalPalette.fromHueAndChroma(seedHct.hue, seedHct.chroma);
-			palettes[role] = {};
+			let palette;
 			
+			// Use custom color if provided, otherwise use seed color
+			if (customCoreColors[role]) {
+				const customArgb = argbFromHex(customCoreColors[role]);
+				const customHct = Hct.fromInt(customArgb);
+				palette = TonalPalette.fromHueAndChroma(customHct.hue, customHct.chroma);
+			} else {
+				palette = TonalPalette.fromHueAndChroma(seedHct.hue, seedHct.chroma);
+			}
+			
+			palettes[role] = {};
 			this.tones.forEach(tone => {
 				palettes[role][tone] = hexFromArgb(palette.tone(tone));
 			});
@@ -455,5 +465,25 @@ export class ColorGeneratorService {
 			.toLowerCase()
 			.replace(/[^a-zA-Z0-9]+(.)/g, (match, chr) => chr.toUpperCase())
 			.replace(/^[^a-zA-Z]+/, '');
+	}
+
+	/**
+	 * Get default core colors for current scheme
+	 * @param {Hct} seedHct - Seed color in HCT format
+	 * @param {number} variant - Color variant
+	 * @param {number} specVersion - Specification version
+	 * @returns {Object} Default core colors
+	 */
+	getDefaultCoreColors(seedHct, variant, specVersion) {
+		const lightScheme = this.createCustomDynamicScheme(seedHct, variant, false, specVersion);
+		
+		return {
+			primary: hexFromArgb(MaterialDynamicColors.primary.getArgb(lightScheme)),
+			secondary: hexFromArgb(MaterialDynamicColors.secondary.getArgb(lightScheme)),
+			tertiary: hexFromArgb(MaterialDynamicColors.tertiary.getArgb(lightScheme)),
+			error: hexFromArgb(MaterialDynamicColors.error.getArgb(lightScheme)),
+			neutral: hexFromArgb(lightScheme.neutralPalette.tone(50)),
+			neutralVariant: hexFromArgb(lightScheme.neutralVariantPalette.tone(50))
+		};
 	}
 }

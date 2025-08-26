@@ -3,11 +3,15 @@
  * Handles all color picker setup, events, and UI updates
  */
 export class ColorPickerManager {
+	constructor() {
+		// Import Color from color-picker's context
+		this.Color = window.Color || globalThis.Color;
+	}
 	/**
 	 * Setup a color picker with all necessary event bindings
 	 * @param {Object} config - Color picker configuration
 	 */
-	setupColorPicker(config) {
+	async setupColorPicker(config) {
 		const {
 			colorPicker,
 			colorInput,
@@ -17,6 +21,9 @@ export class ColorPickerManager {
 			onChange = () => {},
 			logPrefix = 'Color picker'
 		} = config;
+		
+		// Wait for color-picker custom element to be defined
+		await this.waitForCustomElement(colorPicker, logPrefix);
 		
 		// Set initial color
 		this.setColorPickerColor(colorPicker, colorPreview, colorInput, initialColor);
@@ -30,12 +37,46 @@ export class ColorPickerManager {
 		// Bind preview click and dropdown events
 		this.bindColorPreviewEvents(colorPreview, colorDropdown);
 	}
+
+	/**
+	 * Wait for custom element to be defined and fully upgraded
+	 * @param {HTMLElement} colorPicker - Color picker element
+	 * @param {string} logPrefix - Log prefix for debugging
+	 */
+	async waitForCustomElement(colorPicker, logPrefix) {
+		try {
+			// Wait for color-picker custom element to be defined
+			await customElements.whenDefined('color-picker');
+			
+			// Ensure the element is fully upgraded
+			if (colorPicker && typeof colorPicker.upgradeProperty === 'function') {
+				colorPicker.upgradeProperty('colorSpace');
+				colorPicker.upgradeProperty('space');
+			}
+			
+			console.log(`${logPrefix} - Custom element ready, color-space:`, colorPicker?.getAttribute('color-space'));
+		} catch (error) {
+			console.warn(`${logPrefix} - Error waiting for custom element:`, error);
+		}
+	}
 	
 	/**
 	 * Set color picker color and update UI elements
 	 */
 	setColorPickerColor(colorPicker, colorPreview, colorInput, color) {
-		colorPicker.color = color;
+		try {
+			// Create Color object if we have the Color class
+			if (this.Color) {
+				colorPicker.color = new this.Color(color);
+			} else {
+				// Fallback: try to set as string
+				colorPicker.setAttribute('color', color);
+			}
+		} catch (error) {
+			// Final fallback: set as attribute
+			colorPicker.setAttribute('color', color);
+		}
+		
 		const container = colorPreview.parentElement;
 		container.style.setProperty('--preview-color', color);
 		if (colorInput) {
@@ -79,7 +120,19 @@ export class ColorPickerManager {
 		colorInput.addEventListener('input', (e) => {
 			const color = e.target.value;
 			if (this.isValidHexColor(color)) {
-				colorPicker.color = color;
+				try {
+					// Create Color object if we have the Color class
+					if (this.Color) {
+						colorPicker.color = new this.Color(color);
+					} else {
+						// Fallback: try to set as string
+						colorPicker.setAttribute('color', color);
+					}
+				} catch (error) {
+					// Final fallback: set as attribute
+					colorPicker.setAttribute('color', color);
+				}
+				
 				const container = colorPreview.parentElement;
 				container.style.setProperty('--preview-color', color);
 				onChange();

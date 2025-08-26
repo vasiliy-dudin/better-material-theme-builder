@@ -95,10 +95,10 @@ code {
 }
 
 /* Hide unwanted elements in color picker */
-color-picker::part(color-space),
+/* color-picker::part(color-space),
 color-picker::part(details) {
 	display: none !important;
-}
+} */
 
 color-picker::part(swatch) {
     --color: var(--preview-color);
@@ -291,6 +291,73 @@ footer a:hover {
 	display: none;
 }
 
+/* Core Colors Grid */
+.core-colors-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+	gap: 12px;
+}
+
+.core-color-item {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px;
+	border: 1px solid rgba(0, 0, 0, 0.1);
+	border-radius: 8px;
+	background: rgba(255, 255, 255, 0.5);
+	transition: all 0.2s ease;
+}
+
+.core-color-item:hover {
+	background: rgba(255, 255, 255, 0.7);
+	border-color: rgba(0, 0, 0, 0.15);
+}
+
+.core-color-label {
+	min-width: 80px;
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: #333;
+}
+
+.core-color-input-group {
+	display: flex;
+	align-items: center;
+	flex: 1;
+	gap: 8px;
+}
+
+.core-color-input-group .color-picker-container {
+	flex-shrink: 0;
+}
+
+.core-color-input-group .form-control {
+	width: 100px;
+	flex-shrink: 0;
+}
+
+.core-color-reset {
+	background: none;
+	border: none;
+	color: #666;
+	cursor: pointer;
+	padding: 4px 8px;
+	border-radius: 4px;
+	font-size: 0.75rem;
+	transition: all 0.2s ease;
+}
+
+.core-color-reset:hover {
+	background: rgba(0, 0, 0, 0.1);
+	color: #333;
+}
+
+.core-color-reset:disabled {
+	opacity: 0.3;
+	cursor: not-allowed;
+}
+
 /* Responsive drawer */
 @media (max-width: 768px) {
 	.json-drawer {
@@ -303,5 +370,9 @@ footer a:hover {
 		right: 20px;
 		padding: 12px 20px;
 		font-size: 0.9rem;
+	}
+	
+	.core-colors-grid {
+		grid-template-columns: 1fr;
 	}
 }
