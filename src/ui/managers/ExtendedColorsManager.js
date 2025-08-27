@@ -45,7 +45,7 @@ export class ExtendedColorsManager {
 		
 		const colorId = Date.now().toString();
 		const colorDiv = document.createElement('div');
-		colorDiv.className = 'mb-2 extended-color-row';
+		colorDiv.className = 'color-row extended-color-row';
 		colorDiv.dataset.colorId = colorId;
 		
 		// Calculate next color number

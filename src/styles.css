@@ -50,22 +50,22 @@ code {
 	position: relative;
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	flex: 0 0 auto;
 }
 
 .color-preview {
-	width: 40px;
-	height: 38px;
-	border-radius: 8px 0 0 8px;
-	border: 2px solid rgba(255, 255, 255, 0.2);
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	border: 1px solid rgba(0, 0, 0, 0.05);
 	cursor: pointer;
-	transition: all 0.2s ease;
+	transition: all 0.1s ease;
 	background-color: var(--preview-color);
+
 }
 
 .color-preview:hover {
-	transform: scale(1.05);
-	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+	transform: scale(1.03);
 }
 
 .color-dropdown {
@@ -148,6 +148,26 @@ footer a:hover {
 .input-group .color-picker-container {
 	display: flex;
 	align-items: center;
+	flex-shrink: 0;
+}
+
+/* Seed color specific styles */
+#seedColorPreview {
+	border-radius: 50%;
+	width: 56px;
+	height: 56px;
+}
+
+/* Ensure input groups have proper borders */
+.color-row .input-group > :not(:first-child) {
+	margin-left: -1px;
+	border-top-left-radius: 0 !important;
+	border-bottom-left-radius: 0 !important;
+}
+
+.color-row .input-group > :first-child {
+	border-top-right-radius: 0 !important;
+	border-bottom-right-radius: 0 !important;
 }
 
 .input-group .color-hex-input {
@@ -299,10 +319,98 @@ footer a:hover {
 }
 
 /* Core Colors Grid */
-.core-colors-grid {
+.core-colors-container {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-	gap: 12px;
+	gap: 8px;
+}
+
+/* Color row styling */
+.color-row {
+	display: flex;
+	flex-direction: row;
+	width: 100%;
+	background-color: #f8f9fa;
+	border-radius: 16px;
+	padding: 8px;
+}
+
+
+
+/* Input group styling */
+.color-row .input-group {
+	width: 100%;
+	display: flex;
+	align-items: stretch;
+}
+
+.color-row .form-control {
+	height: 56px;
+	padding-left: 1rem;
+}
+
+.color-row .btn-outline-secondary {
+	height: 56px;
+	border-radius: 0 8px 8px 0;
+	border: 1px solid #dee2e6;
+	border-left: none;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0 1rem;
+}
+
+.color-row .btn-outline-secondary:hover {
+	background-color: #f1f3f5;
+}
+
+.color-row .form-control:focus {
+	box-shadow: none;
+	border-color: #86b7fe;
+}
+
+.color-row .core-color-label {
+	font-weight: 500;
+	margin-bottom: 0.75rem;
+	color: #212529;
+	font-size: 0.9375rem;
+	display: flex;
+	align-items: center;
+}
+
+/* Removed colon from core color labels */
+
+.core-color-input-group {
+	display: flex;
+	width: 100%;
+	gap: 0.25rem;
+	align-items: stretch;
+}
+
+/* Hover and focus states */
+.color-row:focus-within {
+	box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.15);
+}
+
+/* Disabled state */
+.color-row.disabled {
+	opacity: 0.65;
+	pointer-events: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+	.color-row {
+		padding: 0.75rem;
+	}
+	
+	.core-color-label {
+		font-size: 0.875rem;
+	}
+	
+	.color-preview {
+		width: 48px;
+		height: 48px;
+	}
 }
 
 .core-color-item {
@@ -345,6 +453,8 @@ footer a:hover {
 }
 
 .core-color-reset {
+	display: inline-flex;
+	align-items: center;
 	background: none;
 	border: none;
 	color: #666;
@@ -352,7 +462,12 @@ footer a:hover {
 	padding: 4px 8px;
 	border-radius: 4px;
 	font-size: 0.75rem;
+	text-decoration: none;
 	transition: all 0.2s ease;
+
+	i {
+		display: inline-flex;
+	}
 }
 
 .core-color-reset:hover {
@@ -377,9 +492,5 @@ footer a:hover {
 		right: 20px;
 		padding: 12px 20px;
 		font-size: 0.9rem;
-	}
-	
-	.core-colors-grid {
-		grid-template-columns: 1fr;
-	}
+	}	
 }

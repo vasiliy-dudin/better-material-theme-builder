@@ -44,7 +44,7 @@ export class CoreColorsManager {
 		if (!this.coreColorsContainer) return;
 
 		const colorDiv = document.createElement('div');
-		colorDiv.className = 'mb-3 core-color-row';
+		colorDiv.className = 'color-row core-color-row';
 		colorDiv.dataset.coreColor = colorKey;
 
 		colorDiv.innerHTML = `
@@ -57,7 +57,9 @@ export class CoreColorsManager {
 					</div>
 				</div>
 				<input type="text" class="form-control core-color-hex-input" placeholder="${defaultColor}" data-core-color="${colorKey}">
-				<button type="button" class="btn btn-outline-secondary core-color-reset" data-core-color="${colorKey}" title="Reset to default">↻</button>
+				<button type="button" class="btn btn-link text-secondary fs-4 core-color-reset" data-core-color="${colorKey}" title="Reset to default">
+					<i class="bi bi-arrow-clockwise"></i>
+				</button>
 			</div>
 		`;
 
