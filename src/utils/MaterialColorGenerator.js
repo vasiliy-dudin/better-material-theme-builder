@@ -10,29 +10,23 @@ import {
 	TonalPalette
 } from '@materialx/material-color-utilities';
 
+import {
+	STYLE_OPTIONS,
+	STATE_LAYER_OPACITIES,
+	TONAL_VALUES,
+	VALID_COLOR_ROLES
+} from '../constants/materialDesign.js';
+
 /**
  * Generator for Material Design color schemes and palettes
  */
 export class MaterialColorGenerator {
 	constructor() {
-		// Mapping of scheme names to numbers
-		this.styleMapping = {
-			'MONOCHROME': Variant.MONOCHROME,
-			'NEUTRAL': Variant.NEUTRAL,
-			'TONAL_SPOT': Variant.TONAL_SPOT,
-			'VIBRANT': Variant.VIBRANT,
-			'EXPRESSIVE': Variant.EXPRESSIVE,
-			'FIDELITY': Variant.FIDELITY,
-			'CONTENT': Variant.CONTENT,
-			'RAINBOW': Variant.RAINBOW,
-			'FRUIT_SALAD': Variant.FRUIT_SALAD
-		};
-
-		// Tonal values for tonal palettes
-		this.tones = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 99, 100];
-
-		// Colour roles
-		this.colorRoles = ['primary', 'secondary', 'tertiary', 'error', 'neutral', 'neutralVariant'];
+		// Create mapping of scheme names to numbers from constants
+		this.styleMapping = STYLE_OPTIONS.reduce((mapping, option) => {
+			mapping[option.value] = Variant[option.value];
+			return mapping;
+		}, {});
 	}
 
 	/**
@@ -228,14 +222,8 @@ export class MaterialColorGenerator {
 	generateStateLayers(colors) {
 		const stateLayers = {};
 		
-		// State layer opacity values according to Material Design 3
-		const opacities = {
-			hover: 0.08,
-			focus: 0.12,
-			pressed: 0.12,
-			dragged: 0.16,
-			disabled: 0.12
-		};
+		// Use state layer opacity values from constants
+		const opacities = STATE_LAYER_OPACITIES;
 		
 		// Primary state layers
 		stateLayers.primary = {
@@ -299,7 +287,7 @@ export class MaterialColorGenerator {
 		const seedHct = Hct.fromInt(seedArgb);
 		
 		// Generate palettes for each color role
-		this.colorRoles.forEach(role => {
+		VALID_COLOR_ROLES.forEach(role => {
 			let palette;
 			
 			// Use custom color if provided, otherwise use seed color
@@ -312,7 +300,7 @@ export class MaterialColorGenerator {
 			}
 			
 			palettes[role] = {};
-			this.tones.forEach(tone => {
+			TONAL_VALUES.forEach(tone => {
 				palettes[role][tone] = hexFromArgb(palette.tone(tone));
 			});
 		});
@@ -327,7 +315,7 @@ export class MaterialColorGenerator {
 					const palette = TonalPalette.fromHueAndChroma(colorHct.hue, colorHct.chroma);
 					
 					palettes[colorName] = {};
-					this.tones.forEach(tone => {
+					TONAL_VALUES.forEach(tone => {
 						palettes[colorName][tone] = hexFromArgb(palette.tone(tone));
 					});
 				} catch (error) {
@@ -368,7 +356,7 @@ export class MaterialColorGenerator {
 					darkColors[`on${this.toCamelCase(colorName)}Container`] = this.calculateOnColor(this.darkenColor(baseColor, 0.3), true);
 					
 					// Add state layers
-					const opacities = { hover: 0.08, focus: 0.12, pressed: 0.12, dragged: 0.16, disabled: 0.12 };
+					const opacities = STATE_LAYER_OPACITIES;
 					
 					lightStateLayers[colorName] = {
 						hover: this.addOpacityToHex(lightColors[colorName], opacities.hover),
