@@ -68,6 +68,11 @@ code {
 	transform: scale(1.03);
 }
 
+/* Hide reset button for primary core color */
+[data-core-color="primary"] .core-color-reset {
+	display: none !important;
+}
+
 .color-dropdown {
 	position: absolute;
 	top: 100%;
