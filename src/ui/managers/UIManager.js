@@ -101,6 +101,20 @@ export class UIManager {
 	setGenerateCallback(callback) {
 		this.onGenerate = callback;
 	}
+	
+	/**
+	 * Set callback for extended colors update
+	 */
+	setExtendedColorsUpdateCallback(callback) {
+		this.extendedColorsManager.setUpdateCallback(callback);
+	}
+	
+	/**
+	 * Set callback for core colors update
+	 */
+	setCoreColorsUpdateCallback(callback) {
+		this.coreColorsManager.setUpdateCallback(callback);
+	}
 
 	/**
 	 * Set callback for format change
