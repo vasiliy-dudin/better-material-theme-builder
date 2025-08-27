@@ -25,7 +25,7 @@ export const CORE_COLOR_TYPES = [
 	{ key: 'tertiary', label: 'Tertiary', defaultColor: '#7D5260' },
 	{ key: 'error', label: 'Error', defaultColor: '#BA1A1A' },
 	{ key: 'neutral', label: 'Neutral', defaultColor: '#67616F' },
-	{ key: 'neutralVariant', label: 'N. Variant', defaultColor: '#68616A' }
+	{ key: 'neutralVariant', label: 'Neutral Variant', defaultColor: '#68616A' }
 ];
 
 export const DEFAULT_SEED_COLOR = '#6750A4';
