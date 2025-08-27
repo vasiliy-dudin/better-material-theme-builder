@@ -36,6 +36,7 @@ class MaterialColorApp {
 		// Set up callbacks
 		this.uiManager.setGenerateCallback(() => this.regenerateWithExtendedColors());
 		this.uiManager.setExtendedColorsUpdateCallback(() => this.regenerateWithExtendedColors());
+		this.uiManager.setCoreColorsUpdateCallback(() => this.regenerateWithExtendedColors());
 		this.uiManager.setFormatChangeCallback(() => this.updateResultFormat());
 		
 		// Initial generation

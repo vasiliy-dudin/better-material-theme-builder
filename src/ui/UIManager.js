@@ -710,11 +710,51 @@ export class UIManager {
 	updateCustomCoreColor(colorKey, color) {
 		if (this.isValidHexColor(color)) {
 			this.customCoreColors[colorKey] = color;
+			
+			// Special handling for primary color: it acts as new seed color
+			if (colorKey === 'primary') {
+				this.handlePrimaryAsNewSeed(color);
+				return; // Don't call regular generate, handlePrimaryAsNewSeed will do it
+			}
 		} else {
 			delete this.customCoreColors[colorKey];
 		}
 		
 		this.updateResetButtonState(colorKey);
+		this.onGenerate?.();
+	}
+
+	/**
+	 * Handle primary core color change as new seed color
+	 * This regenerates other core colors based on the new primary
+	 */
+	handlePrimaryAsNewSeed(primaryColor) {
+		// Update seed color input and preview
+		if (this.seedColorInput) {
+			this.seedColorInput.value = primaryColor;
+		}
+		
+		if (this.seedColorPreview) {
+			const container = this.seedColorPreview.parentElement;
+			container.style.setProperty('--preview-color', primaryColor);
+		}
+		
+		// Update seed color picker
+		const seedColorPicker = this.seedColorDropdown?.querySelector('color-picker');
+		if (seedColorPicker && seedColorPicker.color) {
+			seedColorPicker.color = primaryColor;
+		}
+		
+		// Clear other custom core colors so they regenerate from new seed
+		const otherCoreColors = ['secondary', 'tertiary', 'error', 'neutral', 'neutralVariant'];
+		otherCoreColors.forEach(colorKey => {
+			if (colorKey in this.customCoreColors) {
+				delete this.customCoreColors[colorKey];
+				this.updateResetButtonState(colorKey);
+			}
+		});
+		
+		// Trigger regeneration
 		this.onGenerate?.();
 	}
 
@@ -782,10 +822,16 @@ export class UIManager {
 			if (!(colorKey in this.customCoreColors)) {
 				const colorPreview = this.coreColorsContainer.querySelector(`[data-core-color="${colorKey}"].color-preview`);
 				const colorPicker = this.coreColorsContainer.querySelector(`[data-core-color="${colorKey}"] color-picker`);
+				const hexInput = this.coreColorsContainer.querySelector(`[data-core-color="${colorKey}"].core-color-hex-input`);
 				
 				if (colorPreview) {
 					const container = colorPreview.parentElement;
 					container.style.setProperty('--preview-color', color);
+				}
+				
+				// Update HEX input to show new default value
+				if (hexInput) {
+					hexInput.value = color;
 				}
 				
 				if (colorPicker && colorPicker.color) {

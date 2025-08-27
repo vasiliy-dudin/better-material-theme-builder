@@ -13,14 +13,14 @@ export class DataBuilder {
 			seedColor,
 			style,
 			colorSpec,
-			customColors = {}
+			customCoreColors = {}
 		} = uiData;
 
 		return {
 			seedColor: this.validateHexColor(seedColor || '#6750A4'),
 			style: (style || 'TONAL_SPOT').toUpperCase(),
 			colorSpec: (colorSpec || 'SPEC_2021').toUpperCase(),
-			customColors: this.validateCustomColors(customColors)
+			customCoreColors: this.validateCustomColors(customCoreColors)
 		};
 	}
 
