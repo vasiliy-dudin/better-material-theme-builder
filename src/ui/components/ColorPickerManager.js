@@ -54,7 +54,6 @@ export class ColorPickerManager {
 				colorPicker.upgradeProperty('space');
 			}
 			
-			console.log(`${logPrefix} - Custom element ready, color-space:`, colorPicker?.getAttribute('color-space'));
 		} catch (error) {
 			console.warn(`${logPrefix} - Error waiting for custom element:`, error);
 		}
