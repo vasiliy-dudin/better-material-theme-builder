@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: process.env.NODE_ENV === 'production' ? '/MaterialKolor-to-json/' : '/',
+  base: process.env.NODE_ENV === 'production' ? '' : '/',
   root: './src',
   server: {
     port: 3000,
