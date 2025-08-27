@@ -30,7 +30,6 @@ export function validateHexColor(color, defaultColor = '#6750A4') {
 	// Validate hex format (3 or 6 characters)
 	const hexRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
 	if (!hexRegex.test(color)) {
-		console.warn('Invalid hex color:', color, 'Using default');
 		return defaultColor;
 	}
 	

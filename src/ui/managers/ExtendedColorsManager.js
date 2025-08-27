@@ -1,4 +1,4 @@
-import { validateHexColor } from '../../utils/validators.js';
+import { validateHexColor, isValidHexColor } from '../../utils/validators.js';
 
 /**
  * Manager for extended colors functionality
