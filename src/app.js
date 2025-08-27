@@ -1,7 +1,7 @@
-import { DataBuilder } from './core/DataBuilder.js';
+import { buildFromUI } from './utils/validators.js';
 import { ColorGeneratorService } from './services/ColorGeneratorService.js';
-import { UIManager } from './ui/UIManager.js';
-import { FormatUtils } from './utils/FormatUtils.js';
+import { UIManager } from './ui/managers/UIManager.js';
+import { FormatUtils } from './utils/format.js';
 import { W3cDtcgConverter } from './formatters/W3cDtcgConverter.js';
 
 // Import Material Color Utilities for core color defaults
@@ -16,7 +16,6 @@ class MaterialColorApp {
 		// Initialize services
 		this.colorGenerator = new ColorGeneratorService();
 		this.formatUtils = new FormatUtils();
-		this.dataBuilder = new DataBuilder();
 		this.w3cConverter = new W3cDtcgConverter();
 		
 		// Initialize UI Manager
@@ -53,7 +52,7 @@ class MaterialColorApp {
 			const extendedColors = this.uiManager.getExtendedColors();
 
 			// Build data from UI inputs
-			const parsedData = this.dataBuilder.buildFromUI(colorSettings);
+			const parsedData = buildFromUI(colorSettings);
 
 			// Update default core colors in UI when seed color or style changes
 			this.updateDefaultCoreColors(parsedData);
@@ -173,7 +172,7 @@ class MaterialColorApp {
 			const extendedColors = this.uiManager.getExtendedColors();
 
 			// Build data from UI inputs
-			const parsedData = this.dataBuilder.buildFromUI(colorSettings);
+			const parsedData = buildFromUI(colorSettings);
 
 			// Update default core colors in UI when seed color or style changes
 			this.updateDefaultCoreColors(parsedData);

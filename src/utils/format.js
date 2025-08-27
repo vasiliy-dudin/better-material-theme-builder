@@ -1,4 +1,4 @@
-import { ColorUtils } from './ColorUtils.js';
+import { ColorUtils } from './color.js';
 
 /**
  * Module for key transformation and result formatting

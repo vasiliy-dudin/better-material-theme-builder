@@ -1,4 +1,4 @@
-import { ColorUtils } from '../utils/ColorUtils.js';
+import { ColorUtils } from '../utils/color.js';
 
 /**
  * Converter for W3C Design Tokens Community Group (W3C DTCG) format
