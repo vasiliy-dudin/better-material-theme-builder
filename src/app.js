@@ -1,8 +1,8 @@
 import { buildFromUI } from './utils/validators.js';
-import { ColorGeneratorService } from './services/ColorGeneratorService.js';
+import { MaterialColorGenerator } from './utils/MaterialColorGenerator.js';
 import { UIManager } from './ui/managers/UIManager.js';
 import { FormatUtils } from './utils/format.js';
-import { W3cDtcgConverter } from './formatters/W3cDtcgConverter.js';
+import { W3cDtcgConverter } from './utils/W3cDtcgConverter.js';
 
 // Import Material Color Utilities for core color defaults
 import { argbFromHex, Hct, SpecVersion, Variant } from '@materialx/material-color-utilities';
@@ -14,7 +14,7 @@ import { argbFromHex, Hct, SpecVersion, Variant } from '@materialx/material-colo
 class MaterialColorApp {
 	constructor() {
 		// Initialize services
-		this.colorGenerator = new ColorGeneratorService();
+		this.colorGenerator = new MaterialColorGenerator();
 		this.formatUtils = new FormatUtils();
 		this.w3cConverter = new W3cDtcgConverter();
 		

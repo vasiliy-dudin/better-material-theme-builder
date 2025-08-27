@@ -11,9 +11,9 @@ import {
 } from '@materialx/material-color-utilities';
 
 /**
- * Service for generating Material Design color schemes and palettes
+ * Generator for Material Design color schemes and palettes
  */
-export class ColorGeneratorService {
+export class MaterialColorGenerator {
 	constructor() {
 		// Mapping of scheme names to numbers
 		this.styleMapping = {
