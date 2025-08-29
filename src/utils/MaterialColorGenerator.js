@@ -60,7 +60,7 @@ export class MaterialColorGenerator {
 			const darkStateLayers = this.generateStateLayers(darkColors);
 
 			// Generate tonal palettes with custom core colors support
-			const tonalPalettes = this.generateTonalPalettes(seedArgb, extendedColors, customCoreColors);
+			const tonalPalettes = this.generateTonalPalettes(lightScheme, extendedColors, customCoreColors);
 
 			// Process extended colors
 			if (extendedColors && extendedColors.length > 0) {
@@ -274,35 +274,44 @@ export class MaterialColorGenerator {
 	}
 
 	/**
-	 * Generate tonal palettes for all color roles
-	 * @param {number} seedArgb - Seed color in ARGB format
+	 * Generate tonal palettes for all color roles using actual scheme palettes
+	 * @param {DynamicScheme} lightScheme - Light scheme instance for palette extraction
 	 * @param {Array} extendedColors - Extended color definitions
 	 * @param {Object} customCoreColors - Custom core color overrides
 	 * @returns {Object} Tonal palettes object
 	 */
-	generateTonalPalettes(seedArgb, extendedColors = [], customCoreColors = {}) {
+	generateTonalPalettes(lightScheme, extendedColors = [], customCoreColors = {}) {
 		const palettes = {};
 		
-		// Create HCT from seed color
-		const seedHct = Hct.fromInt(seedArgb);
+		// Extract palettes from the actual scheme (variant-aware)
+		const schemePalettes = {
+			primary: lightScheme.primaryPalette,
+			secondary: lightScheme.secondaryPalette,
+			tertiary: lightScheme.tertiaryPalette,
+			error: lightScheme.errorPalette,
+			neutral: lightScheme.neutralPalette,
+			neutralVariant: lightScheme.neutralVariantPalette
+		};
 		
-		// Generate palettes for each color role
+		// Generate palettes for each color role using scheme palettes
 		VALID_COLOR_ROLES.forEach(role => {
 			let palette;
 			
-			// Use custom color if provided, otherwise use seed color
+			// Use custom color if provided, otherwise use scheme palette
 			if (customCoreColors[role]) {
 				const customArgb = argbFromHex(customCoreColors[role]);
 				const customHct = Hct.fromInt(customArgb);
 				palette = TonalPalette.fromHueAndChroma(customHct.hue, customHct.chroma);
 			} else {
-				palette = TonalPalette.fromHueAndChroma(seedHct.hue, seedHct.chroma);
+				palette = schemePalettes[role];
 			}
 			
-			palettes[role] = {};
-			TONAL_VALUES.forEach(tone => {
-				palettes[role][tone] = hexFromArgb(palette.tone(tone));
-			});
+			if (palette) {
+				palettes[role] = {};
+				TONAL_VALUES.forEach(tone => {
+					palettes[role][tone] = hexFromArgb(palette.tone(tone));
+				});
+			}
 		});
 		
 		// Add extended color palettes
