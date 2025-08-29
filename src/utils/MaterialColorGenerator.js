@@ -47,7 +47,7 @@ export class MaterialColorGenerator {
 			const specVersion = colorSpec === 'SPEC_2025' ? SpecVersion.SPEC_2025 : SpecVersion.SPEC_2021;
 
 			// Create dynamic scheme variants with custom color overrides
-			const variant = this.styleMapping[style] || Variant.TONAL_SPOT;
+			const variant = this.styleMapping[style] ?? Variant.TONAL_SPOT;
 			const lightScheme = this.createCustomDynamicScheme(seedHct, variant, false, specVersion, customCoreColors);
 			const darkScheme = this.createCustomDynamicScheme(seedHct, variant, true, specVersion, customCoreColors);
 
@@ -129,8 +129,8 @@ export class MaterialColorGenerator {
 			schemeOptions.neutralVariantPalette = TonalPalette.fromHueAndChroma(neutralVariantHct.hue, neutralVariantHct.chroma);
 		}
 		
-
-		return new DynamicScheme(schemeOptions);
+		// Use the new DynamicScheme.from() method instead of deprecated constructor
+		return DynamicScheme.from(schemeOptions);
 	}
 
 	/**
