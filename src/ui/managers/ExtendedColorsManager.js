@@ -53,13 +53,14 @@ export class ExtendedColorsManager {
 		const colorNumber = existingColors + 1;
 		
 		colorDiv.innerHTML = `
-			<div class="input-group">
-				<div class="color-picker-container">
-					<div class="color-preview" data-color-id="${colorId}"></div>
-					<div class="color-dropdown" data-color-id="${colorId}">
-						<color-picker color-space="oklch" no-preview no-sliders-labels></color-picker>
-					</div>
+			<div class="color-picker-container">
+				<div class="color-preview" data-color-id="${colorId}"></div>
+				<div class="color-dropdown" data-color-id="${colorId}">
+					<color-picker color-space="oklch" no-preview no-sliders-labels></color-picker>
 				</div>
+			</div>
+
+			<div class="input-group">
 				<input type="text" class="form-control color-hex-input" placeholder="#6750A4" data-color-id="${colorId}">
 				<input type="text" class="form-control color-name-input" placeholder="Color name" value="Custom color ${colorNumber}" data-color-id="${colorId}">
 				<div class="form-check form-switch harmonize-container">

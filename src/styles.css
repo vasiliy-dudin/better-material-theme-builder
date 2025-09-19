@@ -333,55 +333,57 @@ footer a:hover {
 /* Color row styling */
 .color-row {
 	display: flex;
-	flex-direction: row;
+	gap: 8px;
 	width: 100%;
 	background-color: #f8f9fa;
 	border-radius: 16px;
 	padding: 8px;
+	&.--core {
+
+	}
+
+	/* Input group styling */
+	.input-group {
+		width: 100%;
+		display: flex;
+		align-items: stretch;
+	}
+
+	.form-control {
+		height: 56px;
+		padding-left: 1rem;
+	}
+
+	.btn-outline-secondary {
+		height: 56px;
+		border-radius: 0 8px 8px 0;
+		border: 1px solid #dee2e6;
+		border-left: none;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0 1rem;
+	}
+
+	.btn-outline-secondary:hover {
+		background-color: #f1f3f5;
+	}
+
+	.form-control:focus {
+		box-shadow: none;
+		border-color: #86b7fe;
+	}
+
+	.core-color-label {
+		display: flex;
+		flex: 0 0 92px;
+		align-items: center;
+	}
 }
 
 
 
-/* Input group styling */
-.color-row .input-group {
-	width: 100%;
-	display: flex;
-	align-items: stretch;
-}
 
-.color-row .form-control {
-	height: 56px;
-	padding-left: 1rem;
-}
-
-.color-row .btn-outline-secondary {
-	height: 56px;
-	border-radius: 0 8px 8px 0;
-	border: 1px solid #dee2e6;
-	border-left: none;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	padding: 0 1rem;
-}
-
-.color-row .btn-outline-secondary:hover {
-	background-color: #f1f3f5;
-}
-
-.color-row .form-control:focus {
-	box-shadow: none;
-	border-color: #86b7fe;
-}
-
-.color-row .core-color-label {
-	font-weight: 500;
-	margin-bottom: 0.75rem;
-	color: #212529;
-	font-size: 0.9375rem;
-	display: flex;
-	align-items: center;
-}
 
 /* Removed colon from core color labels */
 
@@ -433,13 +435,6 @@ footer a:hover {
 .core-color-item:hover {
 	background: rgba(255, 255, 255, 0.7);
 	border-color: rgba(0, 0, 0, 0.15);
-}
-
-.core-color-label {
-	min-width: 80px;
-	font-size: 0.875rem;
-	font-weight: 500;
-	color: #333;
 }
 
 .core-color-input-group {
@@ -499,6 +494,13 @@ footer a:hover {
 		padding: 12px 20px;
 		font-size: 0.9rem;
 	}
+}
+
+/* Extended Colors Container*/
+.extended-colors {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
 }
 
 /* Extended Color Harmonize Checkbox */

@@ -44,18 +44,18 @@ export class CoreColorsManager {
 		if (!this.coreColorsContainer) return;
 
 		const colorDiv = document.createElement('div');
-		colorDiv.className = 'color-row core-color-row';
+		colorDiv.className = 'color-row --core';
 		colorDiv.dataset.coreColor = colorKey;
 
 		colorDiv.innerHTML = `
 			<div class="core-color-label">${colorLabel}</div>
-			<div class="core-color-input-group">
-				<div class="color-picker-container">
-					<div class="color-preview" data-core-color="${colorKey}"></div>
-					<div class="color-dropdown" data-core-color="${colorKey}">
-						<color-picker color-space="oklch" no-preview no-sliders-labels></color-picker>
-					</div>
+			<div class="color-picker-container">
+				<div class="color-preview" data-core-color="${colorKey}"></div>
+				<div class="color-dropdown" data-core-color="${colorKey}">
+					<color-picker color-space="oklch" no-preview no-sliders-labels></color-picker>
 				</div>
+			</div>
+			<div class="core-color-input-group">				
 				<input type="text" class="form-control core-color-hex-input" placeholder="${defaultColor}" data-core-color="${colorKey}">
 				<button type="button" class="btn btn-link text-secondary fs-4 core-color-reset" data-core-color="${colorKey}" title="Reset to default">
 					<i class="bi bi-arrow-clockwise"></i>
