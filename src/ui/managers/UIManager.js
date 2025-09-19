@@ -342,4 +342,55 @@ export class UIManager {
 			}
 		});
 	}
+
+	/**
+	 * Set app settings from URL
+	 */
+	setAppSettings(settings) {
+		console.log('Setting app settings:', settings);
+		if (!settings) return;
+
+		// Seed color
+		if (settings.seedColor) {
+			this.seedColorInput.value = settings.seedColor;
+			this.seedColorPreview?.parentElement.style.setProperty('--preview-color', settings.seedColor);
+			const picker = this.seedColorDropdown?.querySelector('color-picker');
+			if (picker) picker.color = settings.seedColor;
+		}
+
+		// Style and spec chips
+		if (settings.style) {
+			this.currentStyle = settings.style;
+			this.updateChipSelection('styleChips', settings.style);
+		}
+		if (settings.colorSpec) {
+			this.currentSpec = settings.colorSpec;
+			this.updateChipSelection('specChips', settings.colorSpec);
+		}
+
+		// Delegate to managers
+		if (settings.customCoreColors) this.coreColorsManager.setCustomCoreColors(settings.customCoreColors);
+		if (settings.extendedColors) this.extendedColorsManager.setExtendedColors(settings.extendedColors);
+		if (settings.exportSettings) this.exportManager.setExportSettings(settings.exportSettings);
+	}
+
+	/**
+	 * Get current app settings for URL
+	 */
+	getCurrentAppSettings() {
+		return {
+			seedColor: this.getSeedColor(),
+			style: this.getStyle(),
+			colorSpec: this.getColorSpec(),
+			customCoreColors: this.coreColorsManager.getCustomCoreColors(),
+			extendedColors: this.getExtendedColors(),
+			exportSettings: {
+				namingFormat: this.getNamingFormat(),
+				collectionName: this.getCollectionName(),
+				stateLayersEnabled: this.getStateLayersEnabled(),
+				tonalPalettesEnabled: this.getTonalPalettesEnabled(),
+				w3cFormatEnabled: this.getW3cFormatEnabled()
+			}
+		};
+	}
 }

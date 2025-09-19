@@ -203,4 +203,21 @@ export class ExportManager {
 			}
 		}
 	}
+
+	/**
+	 * Set export settings from configuration
+	 */
+	setExportSettings(settings) {
+		console.log('Setting export settings:', settings);
+		if (!settings) return;
+
+		if (settings.namingFormat) this.namingFormatSelect.value = settings.namingFormat;
+		if (settings.collectionName) this.collectionNameInput.value = settings.collectionName;
+		if (typeof settings.stateLayersEnabled === 'boolean') this.stateLayersToggle.checked = settings.stateLayersEnabled;
+		if (typeof settings.tonalPalettesEnabled === 'boolean') this.tonalPalettesToggle.checked = settings.tonalPalettesEnabled;
+		if (typeof settings.w3cFormatEnabled === 'boolean') {
+			this.w3cFormatToggle.checked = settings.w3cFormatEnabled;
+			this.toggleCollectionNameVisibility(settings.w3cFormatEnabled);
+		}
+	}
 }

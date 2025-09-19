@@ -1,6 +1,7 @@
 import { buildFromUI } from './utils/validators.js';
 import { MaterialColorGenerator } from './utils/MaterialColorGenerator.js';
 import { UIManager } from './ui/managers/UIManager.js';
+import { URLManager } from './ui/managers/URLManager.js';
 import { FormatUtils } from './utils/format.js';
 import { W3cDtcgConverter } from './utils/W3cDtcgConverter.js';
 
@@ -17,6 +18,7 @@ class MaterialColorApp {
 		this.colorGenerator = new MaterialColorGenerator();
 		this.formatUtils = new FormatUtils();
 		this.w3cConverter = new W3cDtcgConverter();
+		this.urlManager = new URLManager();
 		
 		// Initialize UI Manager
 		this.uiManager = new UIManager();
@@ -37,6 +39,9 @@ class MaterialColorApp {
 		this.uiManager.setExtendedColorsUpdateCallback(() => this.regenerateWithExtendedColors());
 		this.uiManager.setCoreColorsUpdateCallback(() => this.regenerateWithExtendedColors());
 		this.uiManager.setFormatChangeCallback(() => this.updateResultFormat());
+		
+		// Restore settings from URL if present
+		this.restoreSettingsFromURL();
 		
 		// Initial generation
 		this.regenerateWithExtendedColors();
@@ -71,50 +76,6 @@ class MaterialColorApp {
 		}
 	}
 
-	/**
-	 * Update result display with selected formatting options
-	 */
-	updateResultFormat() {
-		const originalResult = this.uiManager.getOriginalResult();
-		if (!originalResult) {
-			// If no result exists yet, generate one first
-			this.handleGenerate();
-			return;
-		}
-		
-		const namingFormat = this.uiManager.getNamingFormat();
-		const collectionName = this.uiManager.getCollectionName();
-		const includeStateLayers = this.uiManager.getStateLayersEnabled();
-		const includeTonalPalettes = this.uiManager.getTonalPalettesEnabled();
-		const useW3cFormat = this.uiManager.getW3cFormatEnabled();
-		
-		let formattedResult;
-		
-		if (useW3cFormat) {
-			// For W3C format: apply filters first, then convert to W3C, then apply naming format
-			const filteredResult = this.formatUtils.applyFormatOptions(
-				originalResult,
-				includeStateLayers,
-				includeTonalPalettes
-			);
-			
-			// Convert to W3C Design Tokens format with dynamic collection name
-			const w3cResult = W3cDtcgConverter.convertToW3cDtcgFormat(filteredResult, collectionName);
-			
-			// Apply naming format to W3C structure, preserving top-level collection name
-			formattedResult = this.transformW3cKeysExceptTopLevel(w3cResult, namingFormat);
-		} else {
-			// Standard format: apply all formatting together
-			formattedResult = this.formatUtils.formatResult(
-				originalResult,
-				namingFormat,
-				includeStateLayers,
-				includeTonalPalettes
-			);
-		}
-		
-		this.uiManager.displayResult(formattedResult);
-	}
 
 	/**
 	 * Transform W3C Design Tokens keys except the top-level collection name
@@ -185,8 +146,75 @@ class MaterialColorApp {
 			
 			// Apply current format settings to preserve user's toggle states
 			this.updateResultFormat();
+			
+			// Save current settings to URL
+			this.saveSettingsToURL();
 		} catch (error) {
 			console.error('Error regenerating colors:', error);
+		}
+	}
+
+	/**
+	 * Update result format and save settings to URL
+	 */
+	updateResultFormat() {
+		const originalResult = this.uiManager.getOriginalResult();
+		if (!originalResult) {
+			// If no result exists yet, generate one first
+			this.handleGenerate();
+			return;
+		}
+		
+		const namingFormat = this.uiManager.getNamingFormat();
+		const collectionName = this.uiManager.getCollectionName();
+		const includeStateLayers = this.uiManager.getStateLayersEnabled();
+		const includeTonalPalettes = this.uiManager.getTonalPalettesEnabled();
+		const useW3cFormat = this.uiManager.getW3cFormatEnabled();
+		
+		let formattedResult;
+		
+		if (useW3cFormat) {
+			// For W3C format: apply filters first, then convert to W3C, then apply naming format
+			const filteredResult = this.formatUtils.applyFormatOptions(
+				originalResult,
+				includeStateLayers,
+				includeTonalPalettes
+			);
+			
+			// Convert to W3C Design Tokens format with dynamic collection name
+			const w3cResult = W3cDtcgConverter.convertToW3cDtcgFormat(filteredResult, collectionName);
+			
+			// Apply naming format to W3C structure, preserving top-level collection name
+			formattedResult = this.transformW3cKeysExceptTopLevel(w3cResult, namingFormat);
+		} else {
+			// Standard format: apply all formatting together
+			formattedResult = this.formatUtils.formatResult(
+				originalResult,
+				namingFormat,
+				includeStateLayers,
+				includeTonalPalettes
+			);
+		}
+		
+		this.uiManager.displayResult(formattedResult);
+		
+		// Save current settings to URL
+		this.saveSettingsToURL();
+	}
+
+	/**
+	 * Save current app settings to URL
+	 */
+	saveSettingsToURL() {
+		this.urlManager.updateURL(this.uiManager.getCurrentAppSettings());
+	}
+
+	/**
+	 * Restore app settings from URL parameters
+	 */
+	restoreSettingsFromURL() {
+		if (this.urlManager.hasSettingsInURL()) {
+			this.uiManager.setAppSettings(this.urlManager.getSettingsFromURL());
 		}
 	}
 }

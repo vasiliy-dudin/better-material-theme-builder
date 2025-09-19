@@ -239,4 +239,31 @@ export class CoreColorsManager {
 			}
 		});
 	}
+
+	/**
+	 * Set custom core colors from configuration
+	 */
+	setCustomCoreColors(customCoreColors) {
+		console.log('Setting custom core colors:', customCoreColors);
+		if (!customCoreColors) return;
+		
+		this.customCoreColors = {};
+		
+		Object.entries(customCoreColors).forEach(([key, value]) => {
+			if (isValidHexColor(value)) {
+				this.customCoreColors[key] = value;
+				
+				// Update UI directly
+				const preview = this.coreColorsContainer?.querySelector(`[data-core-color="${key}"].color-preview`);
+				const input = this.coreColorsContainer?.querySelector(`[data-core-color="${key}"].core-color-hex-input`);
+				const picker = this.coreColorsContainer?.querySelector(`[data-core-color="${key}"] color-picker`);
+				
+				if (preview) preview.parentElement.style.setProperty('--preview-color', value);
+				if (input) input.value = value;
+				if (picker) picker.color = value;
+				
+				this.updateResetButtonState(key);
+			}
+		});
+	}
 }
