@@ -370,15 +370,15 @@ export class MaterialColorGenerator {
 					
 					// Add to light scheme
 					lightColors[colorName] = baseColor;
-					lightColors[`on${this.toCamelCase(colorName)}`] = this.calculateOnColor(baseColor, false);
-					lightColors[`${colorName}Container`] = this.lightenColor(baseColor, 0.8);
-					lightColors[`on${this.toCamelCase(colorName)}Container`] = this.calculateOnColor(this.lightenColor(baseColor, 0.8), false);
+					lightColors[`on ${colorName}`] = this.calculateOnColor(baseColor, false);
+					lightColors[`${colorName} container`] = this.lightenColor(baseColor, 0.8);
+					lightColors[`on ${colorName} container`] = this.calculateOnColor(this.lightenColor(baseColor, 0.8), false);
 					
 					// Add to dark scheme
 					darkColors[colorName] = this.lightenColor(baseColor, 0.3);
-					darkColors[`on${this.toCamelCase(colorName)}`] = this.calculateOnColor(this.lightenColor(baseColor, 0.3), true);
-					darkColors[`${colorName}Container`] = this.darkenColor(baseColor, 0.3);
-					darkColors[`on${this.toCamelCase(colorName)}Container`] = this.calculateOnColor(this.darkenColor(baseColor, 0.3), true);
+					darkColors[`on ${colorName}`] = this.calculateOnColor(this.lightenColor(baseColor, 0.3), true);
+					darkColors[`${colorName} container`] = this.darkenColor(baseColor, 0.3);
+					darkColors[`on ${colorName} container`] = this.calculateOnColor(this.darkenColor(baseColor, 0.3), true);
 					
 					// Add state layers
 					const opacities = STATE_LAYER_OPACITIES;
