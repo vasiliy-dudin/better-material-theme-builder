@@ -7,7 +7,7 @@
 
 body {
 	font-family: var(--font-body);
-	background: 
+	background:
 		url("data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noiseFilter)' opacity='0.5'/%3E%3C/svg%3E"),
 		radial-gradient(at 58% 16%, #3494c1 0px, transparent 50%),
 		radial-gradient(at 5% 63%, #344ec1 0px, transparent 50%),
@@ -123,6 +123,7 @@ color-picker::part(swatch) {
 	height: 1.25rem !important;
 	margin-top: 0.125rem !important;
 	margin-right: 0.5rem !important;
+	margin-left: 0 !important;
 }
 
 .panel-disabled {
@@ -491,11 +492,50 @@ footer a:hover {
 		width: 100vw;
 		right: -100vw;
 	}
-	
+
 	.get-json-btn {
 		bottom: 20px;
 		right: 20px;
 		padding: 12px 20px;
 		font-size: 0.9rem;
-	}	
+	}
+}
+
+/* Extended Color Harmonize Checkbox */
+.harmonize-container {
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	padding: 0 12px !important;
+	background-color: #f8f9fa !important;
+	border: 1px solid #dee2e6 !important;
+	white-space: nowrap !important;
+	min-width: 100px !important;
+	height: 56px !important;
+	/* Override input-group styles */
+	margin-left: -1px !important;
+	border-top-left-radius: 0 !important;
+	border-bottom-left-radius: 0 !important;
+	border-top-right-radius: 0 !important;
+	border-bottom-right-radius: 0 !important;
+}
+
+
+
+
+/* Ensure proper border radius for remove button after harmonize container */
+.extended-color-row .remove-color-btn {
+	border-top-left-radius: 0 !important;
+	border-bottom-left-radius: 0 !important;
+	margin-left: -1px;
+	height: 56px;
+}
+
+/* Responsive harmonize checkbox */
+@media (max-width: 768px) {
+	.harmonize-container {
+		min-width: 85px;
+		padding: 0 8px;
+		height: 56px;
+	}
 }

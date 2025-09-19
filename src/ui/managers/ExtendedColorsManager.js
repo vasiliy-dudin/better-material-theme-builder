@@ -62,6 +62,12 @@ export class ExtendedColorsManager {
 				</div>
 				<input type="text" class="form-control color-hex-input" placeholder="#6750A4" data-color-id="${colorId}">
 				<input type="text" class="form-control color-name-input" placeholder="Color name" value="Custom color ${colorNumber}" data-color-id="${colorId}">
+				<div class="form-check form-switch harmonize-container">
+					<input class="form-check-input harmonize-checkbox" type="checkbox" id="harmonize_${colorId}" data-color-id="${colorId}" checked>
+					<label class="form-check-label" for="harmonize_${colorId}" title="Harmonize color with primary color">
+						Harmonize
+					</label>
+				</div>
 				<button type="button" class="btn btn-outline-danger remove-color-btn" data-color-id="${colorId}">Remove</button>
 			</div>
 		`;
@@ -80,6 +86,7 @@ export class ExtendedColorsManager {
 		const nameInput = colorDiv.querySelector('.color-name-input');
 		const hexInput = colorDiv.querySelector('.color-hex-input');
 		const removeBtn = colorDiv.querySelector('.remove-color-btn');
+		const harmonizeCheckbox = colorDiv.querySelector('.harmonize-checkbox');
 		const colorPreview = colorDiv.querySelector('.color-preview');
 		const colorDropdown = colorDiv.querySelector('.color-dropdown');
 		const colorPicker = colorDiv.querySelector('color-picker');
@@ -90,11 +97,16 @@ export class ExtendedColorsManager {
 			this.onUpdate?.();
 		});
 
-		// Name and hex input changes
-		[nameInput, hexInput].forEach(input => {
+		// Name, hex input and harmonize checkbox changes
+		[nameInput, hexInput, harmonizeCheckbox].forEach(input => {
 			input.addEventListener('input', () => {
 				this.onUpdate?.();
 			});
+		});
+
+		// Separate change event for checkbox (for better compatibility)
+		harmonizeCheckbox.addEventListener('change', () => {
+			this.onUpdate?.();
 		});
 
 		// Color picker setup
@@ -125,12 +137,14 @@ export class ExtendedColorsManager {
 		colorRows.forEach(row => {
 			const nameInput = row.querySelector('.color-name-input');
 			const hexInput = row.querySelector('.color-hex-input');
+			const harmonizeCheckbox = row.querySelector('.harmonize-checkbox');
 			
 			const name = nameInput?.value?.trim();
 			const color = hexInput?.value?.trim();
+			const harmonize = harmonizeCheckbox?.checked ?? true; // Default to true
 			
 			if (name && color && isValidHexColor(color)) {
-				colors.push({ name, color });
+				colors.push({ name, color, harmonize });
 			}
 		});
 		

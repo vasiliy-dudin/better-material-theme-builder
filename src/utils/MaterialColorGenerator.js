@@ -7,7 +7,8 @@ import {
 	Variant,
 	SpecVersion,
 	MaterialDynamicColors,
-	TonalPalette
+	TonalPalette,
+	Blend
 } from '@materialx/material-color-utilities';
 
 import {
@@ -60,11 +61,11 @@ export class MaterialColorGenerator {
 			const darkStateLayers = this.generateStateLayers(darkColors);
 
 			// Generate tonal palettes with custom core colors support
-			const tonalPalettes = this.generateTonalPalettes(lightScheme, extendedColors, customCoreColors);
+			const tonalPalettes = this.generateTonalPalettes(lightScheme, extendedColors, customCoreColors, seedArgb);
 
 			// Process extended colors
 			if (extendedColors && extendedColors.length > 0) {
-				this.processExtendedColors(extendedColors, lightColors, darkColors, lightStateLayers, darkStateLayers, tonalPalettes);
+				this.processExtendedColors(extendedColors, lightColors, darkColors, lightStateLayers, darkStateLayers, tonalPalettes, seedArgb);
 			}
 
 			return {
@@ -278,9 +279,10 @@ export class MaterialColorGenerator {
 	 * @param {DynamicScheme} lightScheme - Light scheme instance for palette extraction
 	 * @param {Array} extendedColors - Extended color definitions
 	 * @param {Object} customCoreColors - Custom core color overrides
+	 * @param {number} seedColorArgb - Seed color in ARGB format for harmonization
 	 * @returns {Object} Tonal palettes object
 	 */
-	generateTonalPalettes(lightScheme, extendedColors = [], customCoreColors = {}) {
+	generateTonalPalettes(lightScheme, extendedColors = [], customCoreColors = {}, seedColorArgb) {
 		const palettes = {};
 		
 		// Extract palettes from the actual scheme (variant-aware)
@@ -319,7 +321,13 @@ export class MaterialColorGenerator {
 			if (extendedColor.color && extendedColor.name) {
 				try {
 					const colorName = this.sanitizeColorName(extendedColor.name);
-					const colorArgb = argbFromHex(extendedColor.color);
+					let colorArgb = argbFromHex(extendedColor.color);
+					
+					// Apply harmonization if enabled
+					if (extendedColor.harmonize !== false && seedColorArgb) { // Default to true if not specified
+						colorArgb = Blend.harmonize(colorArgb, seedColorArgb);
+					}
+					
 					const colorHct = Hct.fromInt(colorArgb);
 					const palette = TonalPalette.fromHueAndChroma(colorHct.hue, colorHct.chroma);
 					
@@ -344,13 +352,21 @@ export class MaterialColorGenerator {
 	 * @param {Object} lightStateLayers - Light state layers
 	 * @param {Object} darkStateLayers - Dark state layers
 	 * @param {Object} tonalPalettes - Tonal palettes
+	 * @param {number} seedColorArgb - Seed color in ARGB format for harmonization
 	 */
-	processExtendedColors(extendedColors, lightColors, darkColors, lightStateLayers, darkStateLayers, tonalPalettes) {
+	processExtendedColors(extendedColors, lightColors, darkColors, lightStateLayers, darkStateLayers, tonalPalettes, seedColorArgb) {
 		extendedColors.forEach(extendedColor => {
 			if (extendedColor.color && extendedColor.name) {
 				try {
 					const colorName = this.sanitizeColorName(extendedColor.name);
-					const baseColor = extendedColor.color;
+					let baseColor = extendedColor.color;
+					
+					// Apply harmonization if enabled
+					if (extendedColor.harmonize !== false) { // Default to true if not specified
+						const colorArgb = argbFromHex(extendedColor.color);
+						const harmonizedArgb = Blend.harmonize(colorArgb, seedColorArgb);
+						baseColor = hexFromArgb(harmonizedArgb);
+					}
 					
 					// Add to light scheme
 					lightColors[colorName] = baseColor;
