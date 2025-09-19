@@ -126,6 +126,11 @@ export class ExtendedColorsManager {
 			};
 			
 			await this.colorPickerManager.setupColorPicker(config);
+			
+			// Force set color directly as string (like Core Colors and Seed Color)
+			if (colorPicker) {
+				colorPicker.color = initialColor;
+			}
 		}
 	}
 

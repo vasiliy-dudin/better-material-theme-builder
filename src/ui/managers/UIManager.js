@@ -278,12 +278,15 @@ export class UIManager {
 		const colorPicker = this.seedColorDropdown.querySelector('color-picker');
 		if (!colorPicker) return;
 		
+		// Use actual input value (like core colors do)
+		const currentColor = this.seedColorInput.value.trim() || DEFAULT_SEED_COLOR;
+		
 		const config = {
 			colorPicker,
 			colorInput: this.seedColorInput,
 			colorPreview: this.seedColorPreview,
 			colorDropdown: this.seedColorDropdown,
-			initialColor: DEFAULT_SEED_COLOR,
+			initialColor: currentColor,
 			onChange: () => {
 				this.onGenerate?.();
 			},
@@ -291,6 +294,11 @@ export class UIManager {
 		};
 		
 		await this.colorPickerManager.setupColorPicker(config);
+		
+		// Force set color directly as string (like Core Colors do in updateDefaultCoreColors)
+		if (colorPicker) {
+			colorPicker.color = currentColor;
+		}
 	}
 	
 	/**
