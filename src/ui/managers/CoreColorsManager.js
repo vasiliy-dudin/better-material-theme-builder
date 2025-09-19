@@ -244,7 +244,6 @@ export class CoreColorsManager {
 	 * Set custom core colors from configuration
 	 */
 	setCustomCoreColors(customCoreColors) {
-		console.log('Setting custom core colors:', customCoreColors);
 		if (!customCoreColors) return;
 		
 		this.customCoreColors = {};

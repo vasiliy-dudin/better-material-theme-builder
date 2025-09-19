@@ -172,7 +172,6 @@ export class ExtendedColorsManager {
 	 * @param {Array} extendedColors - Array of extended color objects
 	 */
 	setExtendedColors(extendedColors) {
-		console.log('Setting extended colors:', extendedColors);
 		this.clearExtendedColors();
 		
 		if (!Array.isArray(extendedColors)) return;

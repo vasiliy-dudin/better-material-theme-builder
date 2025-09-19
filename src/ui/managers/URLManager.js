@@ -26,8 +26,7 @@ export class URLManager {
 				w3cFormatEnabled: params.get('w3c') === '1'
 			}
 		};
-		
-		console.log('URL settings restored:', settings);
+
 		return settings;
 	}
 

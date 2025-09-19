@@ -355,7 +355,6 @@ export class UIManager {
 	 * Set app settings from URL
 	 */
 	setAppSettings(settings) {
-		console.log('Setting app settings:', settings);
 		if (!settings) return;
 
 		// Seed color

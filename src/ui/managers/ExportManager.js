@@ -208,7 +208,6 @@ export class ExportManager {
 	 * Set export settings from configuration
 	 */
 	setExportSettings(settings) {
-		console.log('Setting export settings:', settings);
 		if (!settings) return;
 
 		if (settings.namingFormat) this.namingFormatSelect.value = settings.namingFormat;
