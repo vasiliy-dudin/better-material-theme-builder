@@ -8,7 +8,8 @@ import {
 	SpecVersion,
 	MaterialDynamicColors,
 	TonalPalette,
-	Blend
+	Blend,
+	DynamicColor
 } from '@materialx/material-color-utilities';
 
 import {
@@ -65,7 +66,7 @@ export class MaterialColorGenerator {
 
 			// Process extended colors
 			if (extendedColors && extendedColors.length > 0) {
-				this.processExtendedColors(extendedColors, lightColors, darkColors, lightStateLayers, darkStateLayers, tonalPalettes, seedArgb);
+				this.processExtendedColors(extendedColors, lightColors, darkColors, lightStateLayers, darkStateLayers, tonalPalettes, seedArgb, lightScheme, darkScheme);
 			}
 
 			return {
@@ -345,59 +346,74 @@ export class MaterialColorGenerator {
 	}
 
 	/**
-	 * Process extended colors and add them to schemes and state layers
-	 * @param {Array} extendedColors - Extended color definitions
+	 * Process extended colors using themeFromSourceColor API from material-color-utilities
+	 * @param {Array} extendedColors - Extended color definitions  
 	 * @param {Object} lightColors - Light scheme colors
 	 * @param {Object} darkColors - Dark scheme colors
 	 * @param {Object} lightStateLayers - Light state layers
 	 * @param {Object} darkStateLayers - Dark state layers
 	 * @param {Object} tonalPalettes - Tonal palettes
 	 * @param {number} seedColorArgb - Seed color in ARGB format for harmonization
+	 * @param {DynamicScheme} lightScheme - Light dynamic scheme (unused now)
+	 * @param {DynamicScheme} darkScheme - Dark dynamic scheme (unused now)
 	 */
-	processExtendedColors(extendedColors, lightColors, darkColors, lightStateLayers, darkStateLayers, tonalPalettes, seedColorArgb) {
+	processExtendedColors(extendedColors, lightColors, darkColors, lightStateLayers, darkStateLayers, tonalPalettes, seedColorArgb, lightScheme, darkScheme) {
+		if (extendedColors.length === 0) return;
+		
+		// Prepare custom colors for themeFromSourceColor API
+		const customColors = extendedColors.map(extendedColor => ({
+			name: this.sanitizeColorName(extendedColor.name),
+			value: argbFromHex(extendedColor.color),
+			blend: extendedColor.harmonize !== false // Default to true if not specified
+		}));
+		
+		// Generate theme with extended colors using the official API
+		const theme = themeFromSourceColor(seedColorArgb, customColors);
+		
+		// Extract extended colors from the generated theme
 		extendedColors.forEach(extendedColor => {
 			if (extendedColor.color && extendedColor.name) {
 				try {
 					const colorName = this.sanitizeColorName(extendedColor.name);
-					let baseColor = extendedColor.color;
 					
-					// Apply harmonization if enabled
-					if (extendedColor.harmonize !== false) { // Default to true if not specified
-						const colorArgb = argbFromHex(extendedColor.color);
-						const harmonizedArgb = Blend.harmonize(colorArgb, seedColorArgb);
-						baseColor = hexFromArgb(harmonizedArgb);
+					// Find the custom color in the array by index
+					const customColorIndex = customColors.findIndex(c => c.name === colorName);
+					
+					if (theme.customColors && theme.customColors[customColorIndex]) {
+						const customColor = theme.customColors[customColorIndex];
+						
+						// Extract colors - library handles all contrast calculations automatically
+						// Light theme colors
+						lightColors[colorName] = hexFromArgb(customColor.light.color);
+						lightColors[`on ${colorName}`] = hexFromArgb(customColor.light.onColor);
+						lightColors[`${colorName} container`] = hexFromArgb(customColor.light.colorContainer);
+						lightColors[`on ${colorName} container`] = hexFromArgb(customColor.light.onColorContainer);
+						
+						// Dark theme colors  
+						darkColors[colorName] = hexFromArgb(customColor.dark.color);
+						darkColors[`on ${colorName}`] = hexFromArgb(customColor.dark.onColor);
+						darkColors[`${colorName} container`] = hexFromArgb(customColor.dark.colorContainer);
+						darkColors[`on ${colorName} container`] = hexFromArgb(customColor.dark.onColorContainer);
+						
+						// Add state layers
+						const opacities = STATE_LAYER_OPACITIES;
+						
+						lightStateLayers[colorName] = {
+							hover: this.addOpacityToHex(lightColors[colorName], opacities.hover),
+							focus: this.addOpacityToHex(lightColors[colorName], opacities.focus),
+							pressed: this.addOpacityToHex(lightColors[colorName], opacities.pressed),
+							dragged: this.addOpacityToHex(lightColors[colorName], opacities.dragged),
+							disabled: this.addOpacityToHex(lightColors[colorName], opacities.disabled)
+						};
+						
+						darkStateLayers[colorName] = {
+							hover: this.addOpacityToHex(darkColors[colorName], opacities.hover),
+							focus: this.addOpacityToHex(darkColors[colorName], opacities.focus),
+							pressed: this.addOpacityToHex(darkColors[colorName], opacities.pressed),
+							dragged: this.addOpacityToHex(darkColors[colorName], opacities.dragged),
+							disabled: this.addOpacityToHex(darkColors[colorName], opacities.disabled)
+						};
 					}
-					
-					// Add to light scheme
-					lightColors[colorName] = baseColor;
-					lightColors[`on ${colorName}`] = this.calculateOnColor(baseColor, false);
-					lightColors[`${colorName} container`] = this.lightenColor(baseColor, 0.8);
-					lightColors[`on ${colorName} container`] = this.calculateOnColor(this.lightenColor(baseColor, 0.8), false);
-					
-					// Add to dark scheme
-					darkColors[colorName] = this.lightenColor(baseColor, 0.3);
-					darkColors[`on ${colorName}`] = this.calculateOnColor(this.lightenColor(baseColor, 0.3), true);
-					darkColors[`${colorName} container`] = this.darkenColor(baseColor, 0.3);
-					darkColors[`on ${colorName} container`] = this.calculateOnColor(this.darkenColor(baseColor, 0.3), true);
-					
-					// Add state layers
-					const opacities = STATE_LAYER_OPACITIES;
-					
-					lightStateLayers[colorName] = {
-						hover: this.addOpacityToHex(lightColors[colorName], opacities.hover),
-						focus: this.addOpacityToHex(lightColors[colorName], opacities.focus),
-						pressed: this.addOpacityToHex(lightColors[colorName], opacities.pressed),
-						dragged: this.addOpacityToHex(lightColors[colorName], opacities.dragged),
-						disabled: this.addOpacityToHex(lightColors[colorName], opacities.disabled)
-					};
-					
-					darkStateLayers[colorName] = {
-						hover: this.addOpacityToHex(darkColors[colorName], opacities.hover),
-						focus: this.addOpacityToHex(darkColors[colorName], opacities.focus),
-						pressed: this.addOpacityToHex(darkColors[colorName], opacities.pressed),
-						dragged: this.addOpacityToHex(darkColors[colorName], opacities.dragged),
-						disabled: this.addOpacityToHex(darkColors[colorName], opacities.disabled)
-					};
 					
 				} catch (error) {
 					console.warn('Error processing extended color:', extendedColor, error);
@@ -421,43 +437,6 @@ export class MaterialColorGenerator {
 		return hexColor + alphaHex;
 	}
 
-	/**
-	 * Lighten color by percentage
-	 * @param {string} hexColor - Hex color string
-	 * @param {number} amount - Amount to lighten (0-1)
-	 * @returns {string} Lightened hex color
-	 */
-	lightenColor(hexColor, amount) {
-		const argb = argbFromHex(hexColor);
-		const hct = Hct.fromInt(argb);
-		const newTone = Math.min(100, hct.tone + (amount * 100));
-		const newHct = Hct.from(hct.hue, hct.chroma, newTone);
-		return hexFromArgb(newHct.toInt());
-	}
-
-	/**
-	 * Darken color by percentage
-	 * @param {string} hexColor - Hex color string
-	 * @param {number} amount - Amount to darken (0-1)
-	 * @returns {string} Darkened hex color
-	 */
-	darkenColor(hexColor, amount) {
-		const argb = argbFromHex(hexColor);
-		const hct = Hct.fromInt(argb);
-		const newTone = Math.max(0, hct.tone - (amount * 100));
-		const newHct = Hct.from(hct.hue, hct.chroma, newTone);
-		return hexFromArgb(newHct.toInt());
-	}
-
-	/**
-	 * Calculate appropriate "on" color for given background
-	 * @param {string} backgroundColor - Background hex color
-	 * @param {boolean} isDark - Whether the scheme is dark
-	 * @returns {string} Appropriate "on" color
-	 */
-	calculateOnColor(backgroundColor, isDark) {
-		return isDark ? '#FFFFFF' : '#000000';
-	}
 
 	/**
 	 * Sanitize color name for use as object key while preserving spaces and hyphens
