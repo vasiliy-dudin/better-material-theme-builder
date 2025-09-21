@@ -88,15 +88,22 @@ export class FormatUtils {
 		for (const [key, value] of Object.entries(obj)) {
 			let newKey = key;
 			
-			if (format === 'kebab-case') {
-				newKey = this.camelToKebab(key);
-			} else if (format === 'Title Case') {
-				newKey = this.camelToTitle(key);
-			} else if (format === 'camelCase' && (key.includes('-') || key.includes(' '))) {
-				// Convert hyphenated or spaced keys to camelCase
-				newKey = this.toCamelCase(key);
+			// Preserve scheme mode names unchanged (Light, Dark, light, dark)
+			if (key.toLowerCase() === 'light' || key.toLowerCase() === 'dark') {
+				// Always use capitalized format: "Light" and "Dark"
+				newKey = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
+			} else {
+				// Apply format transformations to all other keys
+				if (format === 'kebab-case') {
+					newKey = this.camelToKebab(key);
+				} else if (format === 'Title Case') {
+					newKey = this.camelToTitle(key);
+				} else if (format === 'camelCase' && (key.includes('-') || key.includes(' '))) {
+					// Convert hyphenated or spaced keys to camelCase
+					newKey = this.toCamelCase(key);
+				}
+				// camelCase is default, no transformation needed for already camelCase keys
 			}
-			// camelCase is default, no transformation needed for already camelCase keys
 			
 			transformed[newKey] = this.transformKeys(value, format);
 		}
