@@ -10,8 +10,8 @@
 		"deploy": "npm run build && echo. > dist/.nojekyll && gh-pages -d dist"
 	},
 	"dependencies": {
-		"@materialx/material-color-utilities": "^0.4.7",
-		"vite": "^7.1.6"
+		"@materialx/material-color-utilities": "^0.4.8",
+		"vite": "^7.1.9"
 	},
 	"devDependencies": {
 		"gh-pages": "^6.3.0"
