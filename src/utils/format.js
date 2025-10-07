@@ -10,9 +10,11 @@ export class FormatUtils {
 	 * @returns {string} String in kebab-case
 	 */
 	camelToKebab(str) {
-		// If string contains spaces, convert them to hyphens
+		// If string contains spaces, process each part separately then join with hyphens
 		if (str.includes(' ')) {
-			return str.toLowerCase().replace(/\s+/g, '-');
+			return str.split(/\s+/)
+				.map(part => this.camelToKebab(part)) // Recursively process each part
+				.join('-');
 		}
 		// If string already contains hyphens, keep them; otherwise convert camelCase
 		if (str.includes('-')) {
