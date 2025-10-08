@@ -118,12 +118,17 @@ color-picker::part(swatch) {
 
 
 
+.form-check {
+	padding-left: 0 !important;
+}
+
 .form-check-input {
 	width: 2.5rem !important;
 	height: 1.25rem !important;
 	margin-top: 0.125rem !important;
 	margin-right: 0.5rem !important;
 	margin-left: 0 !important;
+	float: left;
 }
 
 .panel-disabled {
