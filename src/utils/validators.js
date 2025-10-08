@@ -77,14 +77,16 @@ export function buildFromUI(uiData) {
 		seedColor,
 		style,
 		colorSpec,
-		customCoreColors = {}
+		customCoreColors = {},
+		reduceNeutralChroma = false
 	} = uiData;
 
 	return {
 		seedColor: validateHexColor(seedColor || '#6750A4'),
 		style: (style || 'TONAL_SPOT').toUpperCase(),
 		colorSpec: (colorSpec || 'SPEC_2021').toUpperCase(),
-		customCoreColors: validateCustomColors(customCoreColors)
+		customCoreColors: validateCustomColors(customCoreColors),
+		reduceNeutralChroma: reduceNeutralChroma
 	};
 }
 

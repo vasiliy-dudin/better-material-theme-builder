@@ -16,7 +16,9 @@ import {
 	STYLE_OPTIONS,
 	STATE_LAYER_OPACITIES,
 	TONAL_VALUES,
-	VALID_COLOR_ROLES
+	VALID_COLOR_ROLES,
+	NEUTRAL_CHROMA_MULTIPLIER,
+	NEUTRAL_VARIANT_CHROMA_MULTIPLIER
 } from '../constants/materialDesign.js';
 
 /**
@@ -39,7 +41,7 @@ export class MaterialColorGenerator {
 	 */
 	async generateColorScheme(parsedData, extendedColors = []) {
 		try {
-			const { seedColor, style, colorSpec, customCoreColors } = parsedData;
+			const { seedColor, style, colorSpec, customCoreColors, reduceNeutralChroma } = parsedData;
 
 			// Convert seed colour to ARGB and HCT
 			const seedArgb = argbFromHex(seedColor);
@@ -50,8 +52,8 @@ export class MaterialColorGenerator {
 
 			// Create dynamic scheme variants with custom color overrides
 			const variant = this.styleMapping[style] ?? Variant.TONAL_SPOT;
-			const lightScheme = this.createCustomDynamicScheme(seedHct, variant, false, specVersion, customCoreColors);
-			const darkScheme = this.createCustomDynamicScheme(seedHct, variant, true, specVersion, customCoreColors);
+			const lightScheme = this.createCustomDynamicScheme(seedHct, variant, false, specVersion, customCoreColors, reduceNeutralChroma);
+			const darkScheme = this.createCustomDynamicScheme(seedHct, variant, true, specVersion, customCoreColors, reduceNeutralChroma);
 
 			// Generate color schemes
 			const lightColors = this.generateSchemeColors(lightScheme);
@@ -94,9 +96,39 @@ export class MaterialColorGenerator {
 	 * @param {boolean} isDark - Whether scheme is dark
 	 * @param {number} specVersion - Specification version
 	 * @param {Object} customColors - Custom color role overrides
+	 * @param {boolean} reduceNeutralChroma - Whether to reduce chroma in neutral palettes
 	 * @returns {DynamicScheme} Dynamic scheme with custom overrides
 	 */
-	createCustomDynamicScheme(sourceColorHct, variant, isDark, specVersion, customColors = {}) {
+	createCustomDynamicScheme(sourceColorHct, variant, isDark, specVersion, customColors = {}, reduceNeutralChroma = false) {
+		// If we need to reduce chroma for neutral palettes, get original hues and chromas
+		let originalNeutralHue = null;
+		let originalNeutralChroma = null;
+		let originalNeutralVariantHue = null;
+		let originalNeutralVariantChroma = null;
+		
+		if (reduceNeutralChroma && (!customColors.neutral || !customColors.neutralVariant)) {
+			// Create a temporary scheme to extract original hues and chromas
+			const tempOptions = {
+				sourceColorHct: sourceColorHct,
+				variant: variant,
+				isDark: isDark,
+				contrastLevel: 0.0,
+				specVersion: specVersion
+			};
+			
+			const tempScheme = DynamicScheme.from(tempOptions);
+			
+			if (!customColors.neutral) {
+				originalNeutralHue = tempScheme.neutralPalette.hue;
+				originalNeutralChroma = tempScheme.neutralPalette.chroma * NEUTRAL_CHROMA_MULTIPLIER;
+			}
+			if (!customColors.neutralVariant) {
+				originalNeutralVariantHue = tempScheme.neutralVariantPalette.hue;
+				originalNeutralVariantChroma = tempScheme.neutralVariantPalette.chroma * NEUTRAL_VARIANT_CHROMA_MULTIPLIER;
+			}
+		}
+		
+		// Now create the final scheme with all custom options
 		const schemeOptions = {
 			sourceColorHct: sourceColorHct,
 			variant: variant,
@@ -105,7 +137,7 @@ export class MaterialColorGenerator {
 			specVersion: specVersion
 		};
 
-		// Add custom palettes if they exist
+		// Add custom palettes for primary, secondary, tertiary, error if they exist
 		if (customColors.primary) {
 			const primaryHct = Hct.fromInt(argbFromHex(customColors.primary));
 			schemeOptions.primaryPalette = TonalPalette.fromHueAndChroma(primaryHct.hue, primaryHct.chroma);
@@ -122,16 +154,27 @@ export class MaterialColorGenerator {
 			const errorHct = Hct.fromInt(argbFromHex(customColors.error));
 			schemeOptions.errorPalette = TonalPalette.fromHueAndChroma(errorHct.hue, errorHct.chroma);
 		}
+		
+		// Handle neutral palettes
 		if (customColors.neutral) {
+			// User customized neutral - use their color as-is
 			const neutralHct = Hct.fromInt(argbFromHex(customColors.neutral));
 			schemeOptions.neutralPalette = TonalPalette.fromHueAndChroma(neutralHct.hue, neutralHct.chroma);
-		}
-		if (customColors.neutralVariant) {
-			const neutralVariantHct = Hct.fromInt(argbFromHex(customColors.neutralVariant));
-			schemeOptions.neutralVariantPalette = TonalPalette.fromHueAndChroma(neutralVariantHct.hue, neutralVariantHct.chroma);
+		} else if (reduceNeutralChroma && originalNeutralHue !== null && originalNeutralChroma !== null) {
+			// Use original hue and proportionally reduced chroma from variant's algorithm
+			schemeOptions.neutralPalette = TonalPalette.fromHueAndChroma(originalNeutralHue, originalNeutralChroma);
 		}
 		
-		// Use the new DynamicScheme.from() method instead of deprecated constructor
+		if (customColors.neutralVariant) {
+			// User customized neutralVariant - use their color as-is
+			const neutralVariantHct = Hct.fromInt(argbFromHex(customColors.neutralVariant));
+			schemeOptions.neutralVariantPalette = TonalPalette.fromHueAndChroma(neutralVariantHct.hue, neutralVariantHct.chroma);
+		} else if (reduceNeutralChroma && originalNeutralVariantHue !== null && originalNeutralVariantChroma !== null) {
+			// Use original hue and proportionally reduced chroma from variant's algorithm
+			schemeOptions.neutralVariantPalette = TonalPalette.fromHueAndChroma(originalNeutralVariantHue, originalNeutralVariantChroma);
+		}
+		
+		// Create and return the final scheme
 		return DynamicScheme.from(schemeOptions);
 	}
 
@@ -464,10 +507,11 @@ export class MaterialColorGenerator {
 	 * @param {Hct} seedHct - Seed color in HCT format
 	 * @param {number} variant - Color variant
 	 * @param {number} specVersion - Specification version
+	 * @param {boolean} reduceNeutralChroma - Whether to reduce chroma in neutral palettes
 	 * @returns {Object} Default core colors
 	 */
-	getDefaultCoreColors(seedHct, variant, specVersion) {
-		const lightScheme = this.createCustomDynamicScheme(seedHct, variant, false, specVersion);
+	getDefaultCoreColors(seedHct, variant, specVersion, reduceNeutralChroma = false) {
+		const lightScheme = this.createCustomDynamicScheme(seedHct, variant, false, specVersion, {}, reduceNeutralChroma);
 		
 		return {
 			primary: hexFromArgb(MaterialDynamicColors.primary.getArgb(lightScheme)),

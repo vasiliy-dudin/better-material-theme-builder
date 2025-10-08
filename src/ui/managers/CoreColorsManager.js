@@ -8,6 +8,7 @@ export class CoreColorsManager {
 	constructor(colorPickerManager) {
 		this.colorPickerManager = colorPickerManager;
 		this.customCoreColors = {}; // Track custom core colors
+		this.programmaticUpdate = false; // Flag to ignore programmatic updates
 		this.initializeElements();
 	}
 
@@ -84,6 +85,9 @@ export class CoreColorsManager {
 
 		// Hex input changes
 		hexInput.addEventListener('input', () => {
+			// Ignore programmatic updates
+			if (this.programmaticUpdate) return;
+			
 			const color = hexInput.value.trim();
 			if (isValidHexColor(color)) {
 				this.updateCustomCoreColor(colorKey, color);
@@ -102,6 +106,9 @@ export class CoreColorsManager {
 				colorDropdown,
 				initialColor: defaultColor,
 				onChange: () => {
+					// Ignore onChange during programmatic updates
+					if (this.programmaticUpdate) return;
+					
 					const color = hexInput.value.trim();
 					if (isValidHexColor(color)) {
 						this.updateCustomCoreColor(colorKey, color);
@@ -203,28 +210,41 @@ export class CoreColorsManager {
 	updateDefaultCoreColors(defaultColors) {
 		if (!this.coreColorsContainer || !defaultColors) return;
 
-		Object.entries(defaultColors).forEach(([colorKey, color]) => {
-			// Only update if not customized
-			if (!(colorKey in this.customCoreColors)) {
-				const colorPreview = this.coreColorsContainer.querySelector(`[data-core-color="${colorKey}"].color-preview`);
-				const colorPicker = this.coreColorsContainer.querySelector(`[data-core-color="${colorKey}"] color-picker`);
-				const hexInput = this.coreColorsContainer.querySelector(`[data-core-color="${colorKey}"].core-color-hex-input`);
-				
-				if (colorPreview) {
-					const container = colorPreview.parentElement;
-					container.style.setProperty('--preview-color', color);
+		// Set flag to prevent input events from marking colors as customized
+		this.programmaticUpdate = true;
+		
+		try {
+			Object.entries(defaultColors).forEach(([colorKey, color]) => {
+				// Validate color value
+				if (!color || !isValidHexColor(color)) {
+					console.warn(`Invalid color for ${colorKey}:`, color);
+					return;
 				}
 				
-				// Update HEX input to show new default value
-				if (hexInput) {
-					hexInput.value = color;
+				// Only update if not customized
+				if (!(colorKey in this.customCoreColors)) {
+					const colorPreview = this.coreColorsContainer.querySelector(`[data-core-color="${colorKey}"].color-preview`);
+					const hexInput = this.coreColorsContainer.querySelector(`[data-core-color="${colorKey}"].core-color-hex-input`);
+					
+					// Update preview
+					if (colorPreview) {
+						const container = colorPreview.parentElement;
+						container.style.setProperty('--preview-color', color);
+					}
+					
+					// Update HEX input
+					if (hexInput) {
+						hexInput.value = color;
+					}
+					
+					// DON'T update picker programmatically - causes errors with Rainbow scheme
+					// Picker will sync when user opens dropdown (ColorPickerManager handles this)
 				}
-				
-				if (colorPicker && colorPicker.color) {
-					colorPicker.color = color;
-				}
-			}
-		});
+			});
+		} finally {
+			// Always reset flag
+			this.programmaticUpdate = false;
+		}
 	}
 
 	/**

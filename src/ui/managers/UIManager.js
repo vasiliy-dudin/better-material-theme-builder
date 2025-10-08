@@ -40,6 +40,7 @@ export class UIManager {
 		this.seedColorDropdown = document.getElementById('seedColorDropdown');
 		this.styleChips = document.getElementById('styleChips');
 		this.specChips = document.getElementById('specChips');
+		this.reduceNeutralChromaToggle = document.getElementById('reduceNeutralChromaToggle');
 		
 		// Track current selections
 		this.currentStyle = DEFAULT_STYLE;
@@ -145,6 +146,13 @@ export class UIManager {
 	}
 	
 	/**
+	 * Get reduce neutral chroma setting
+	 */
+	getReduceNeutralChroma() {
+		return this.reduceNeutralChromaToggle?.checked ?? false; // Default to false
+	}
+	
+	/**
 	 * Get all color configuration settings
 	 */
 	getColorSettings() {
@@ -152,7 +160,8 @@ export class UIManager {
 			seedColor: this.getSeedColor(),
 			style: this.getStyle(),
 			colorSpec: this.getColorSpec(),
-			customCoreColors: this.coreColorsManager.getCustomCoreColors()
+			customCoreColors: this.coreColorsManager.getCustomCoreColors(),
+			reduceNeutralChroma: this.getReduceNeutralChroma()
 		};
 	}
 
@@ -332,6 +341,13 @@ export class UIManager {
 				}
 			});
 		}
+		
+		// Reduce Neutral Chroma toggle
+		if (this.reduceNeutralChromaToggle) {
+			this.reduceNeutralChromaToggle.addEventListener('change', () => {
+				this.onGenerate?.();
+			});
+		}
 	}
 	
 	/**
@@ -375,6 +391,11 @@ export class UIManager {
 			this.updateChipSelection('specChips', settings.colorSpec);
 		}
 
+		// Reduce neutral chroma toggle
+		if (settings.reduceNeutralChroma !== undefined && this.reduceNeutralChromaToggle) {
+			this.reduceNeutralChromaToggle.checked = settings.reduceNeutralChroma;
+		}
+
 		// Delegate to managers
 		if (settings.customCoreColors) this.coreColorsManager.setCustomCoreColors(settings.customCoreColors);
 		if (settings.extendedColors) this.extendedColorsManager.setExtendedColors(settings.extendedColors);
@@ -389,6 +410,7 @@ export class UIManager {
 			seedColor: this.getSeedColor(),
 			style: this.getStyle(),
 			colorSpec: this.getColorSpec(),
+			reduceNeutralChroma: this.getReduceNeutralChroma(),
 			customCoreColors: this.coreColorsManager.getCustomCoreColors(),
 			extendedColors: this.getExtendedColors(),
 			exportSettings: {

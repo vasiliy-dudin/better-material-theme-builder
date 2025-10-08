@@ -31,6 +31,12 @@ export const CORE_COLOR_TYPES = [
 export const DEFAULT_SEED_COLOR = '#6750A4';
 export const DEFAULT_STYLE = 'TONAL_SPOT';
 export const DEFAULT_SPEC = 'SPEC_2025';
+export const DEFAULT_REDUCE_NEUTRAL_CHROMA = false;
+
+// Chroma reduction multiplier for neutral palettes (0-1, where 0.3 = 30% of original)
+// Reduces color tint while preserving relative differences between variants
+export const NEUTRAL_CHROMA_MULTIPLIER = 0.3;
+export const NEUTRAL_VARIANT_CHROMA_MULTIPLIER = 0.35;
 
 export const STATE_LAYER_OPACITIES = {
 	hover: 0.08,

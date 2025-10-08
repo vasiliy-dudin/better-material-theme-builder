@@ -34,8 +34,8 @@ export class ColorPickerManager {
 		// Bind color input events
 		this.bindColorInputEvents(colorInput, colorPicker, colorPreview, onChange);
 		
-		// Bind preview click and dropdown events
-		this.bindColorPreviewEvents(colorPreview, colorDropdown);
+		// Bind preview click and dropdown events (pass picker and input for sync on open)
+		this.bindColorPreviewEvents(colorPreview, colorDropdown, colorPicker, colorInput);
 	}
 
 	/**
@@ -63,6 +63,8 @@ export class ColorPickerManager {
 	 * Set color picker color and update UI elements
 	 */
 	setColorPickerColor(colorPicker, colorPreview, colorInput, color) {
+		// Try to update picker, but silently ignore errors
+		// Some colors from certain schemes can cause internal picker errors
 		try {
 			// Create Color object if we have the Color class
 			if (this.Color) {
@@ -72,8 +74,7 @@ export class ColorPickerManager {
 				colorPicker.setAttribute('color', color);
 			}
 		} catch (error) {
-			// Final fallback: set as attribute
-			colorPicker.setAttribute('color', color);
+			// Silently ignore - picker will work when user interacts with it
 		}
 		
 		const container = colorPreview.parentElement;
@@ -119,6 +120,8 @@ export class ColorPickerManager {
 		colorInput.addEventListener('input', (e) => {
 			const color = e.target.value;
 			if (this.isValidHexColor(color)) {
+				// Try to update color picker, but don't throw errors if it fails
+				// Some color values from certain schemes (like Rainbow) can cause picker errors
 				try {
 					// Create Color object if we have the Color class
 					if (this.Color) {
@@ -128,8 +131,9 @@ export class ColorPickerManager {
 						colorPicker.setAttribute('color', color);
 					}
 				} catch (error) {
-					// Final fallback: set as attribute
-					colorPicker.setAttribute('color', color);
+					// Silently ignore picker update errors
+					// Preview and input will still work correctly
+					// Picker will sync when user interacts with it directly
 				}
 				
 				const container = colorPreview.parentElement;
@@ -142,11 +146,26 @@ export class ColorPickerManager {
 	/**
 	 * Bind color preview click and dropdown events
 	 */
-	bindColorPreviewEvents(colorPreview, colorDropdown) {
+	bindColorPreviewEvents(colorPreview, colorDropdown, colorPicker = null, colorInput = null) {
 		// Color preview click to toggle dropdown
 		colorPreview.addEventListener('click', () => {
 			this.closeOtherColorDropdowns(colorDropdown);
+			const isOpening = !colorDropdown.classList.contains('show');
 			colorDropdown.classList.toggle('show');
+			
+			// When opening dropdown, sync picker with current input value
+			if (isOpening && colorPicker && colorInput) {
+				const currentColor = colorInput.value;
+				if (this.isValidHexColor(currentColor)) {
+					try {
+						// Set HEX string directly (NOT Color object)
+						// This matches Seed Color and Extended Colors pattern
+						colorPicker.color = currentColor;
+					} catch (error) {
+						// Silently ignore - picker might not support this color
+					}
+				}
+			}
 		});
 		
 		// Close dropdown when clicking outside
