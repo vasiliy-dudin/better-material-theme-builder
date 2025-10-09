@@ -1,4 +1,4 @@
-import { DEFAULT_SEED_COLOR, DEFAULT_STYLE, DEFAULT_SPEC, DEFAULT_REDUCE_NEUTRAL_CHROMA } from '../../constants/materialDesign.js';
+import { DEFAULT_SEED_COLOR, DEFAULT_STYLE, DEFAULT_SPEC } from '../../constants/materialDesign.js';
 
 /**
  * Simple URL parameters manager
@@ -16,7 +16,6 @@ export class URLManager {
 			seedColor: params.get('seed'),
 			style: params.get('style'),
 			colorSpec: params.get('spec'),
-			reduceNeutralChroma: params.get('reduceChroma') === '1', // Default to false unless explicitly '1'
 			customCoreColors: this.parseCore(params.get('core')),
 			extendedColors: this.parseExtended(params.get('extended')),
 			exportSettings: {
@@ -40,9 +39,6 @@ export class URLManager {
 			if (settings.seedColor && settings.seedColor !== DEFAULT_SEED_COLOR) params.set('seed', settings.seedColor);
 			if (settings.style && settings.style !== DEFAULT_STYLE) params.set('style', settings.style);
 			if (settings.colorSpec && settings.colorSpec !== DEFAULT_SPEC) params.set('spec', settings.colorSpec);
-			if (settings.reduceNeutralChroma !== undefined && settings.reduceNeutralChroma !== DEFAULT_REDUCE_NEUTRAL_CHROMA) {
-				params.set('reduceChroma', settings.reduceNeutralChroma ? '1' : '0');
-			}
 			
 			// Core colors
 			if (settings.customCoreColors && Object.keys(settings.customCoreColors).length > 0) {

@@ -99,7 +99,7 @@ class MaterialColorApp {
 	 */
 	updateDefaultCoreColors(parsedData) {
 		try {
-			const { seedColor, style, colorSpec, reduceNeutralChroma } = parsedData;
+			const { seedColor, style, colorSpec } = parsedData;
 			
 			// Use imported Material Color Utilities classes
 
@@ -112,7 +112,7 @@ class MaterialColorApp {
 			const specVersion = colorSpec === 'SPEC_2025' ? SpecVersion.SPEC_2025 : SpecVersion.SPEC_2021;
 			
 			// Get default colors for current scheme
-			const defaultColors = this.colorGenerator.getDefaultCoreColors(seedHct, variant, specVersion, reduceNeutralChroma);
+			const defaultColors = this.colorGenerator.getDefaultCoreColors(seedHct, variant, specVersion);
 			
 			// Update UI with default colors
 			this.uiManager.updateDefaultCoreColors(defaultColors);
