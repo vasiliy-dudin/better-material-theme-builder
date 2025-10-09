@@ -1,182 +1,182 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Better Material Theme Builder</title>
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-	<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@400;800&display=swap" rel="stylesheet">
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-	<link rel="stylesheet" href="styles.css">
-</head>
-<body>
-	<div class="container py-4">
-		<header class="text-center mb-5">
-			<h1 class="display-4 fw-bold">Better Material Theme Builder</h1>
-		</header>
-
-		<main>
-			<div class="row">
-				<div class="col-12">
-					<div class="card">
-						<div class="card-body">
-						<h3 class="card-title mb-4">Color Configuration</h3>
-							
-							<!-- Seed Color -->
-							<h5 class="mt-4 mb-2">Seed Color</h5>						
-							<div class="color-row mb-3">
-								<div class="color-picker-container">
-									<div class="color-preview" id="seedColorPreview"></div>
-									<div class="color-dropdown" id="seedColorDropdown">
-										<color-picker color-space="oklch" no-preview no-sliders-labels></color-picker>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Better Material Theme Builder</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+		<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@400;800&amp;display=swap" rel="stylesheet">
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+		<link rel="stylesheet" href="styles.css">
+	</head>
+	<body>
+		<div class="container py-4">
+			<header class="text-center mb-5">
+				<h1 class="display-4 fw-bold">Better Material Theme Builder</h1>
+			</header>
+			<main>
+				<div class="row">
+					<div class="col-12">
+						<div class="card">
+							<div class="card-body">
+								<h3 class="card-title mb-4">Color Configuration</h3>
+								
+								<!-- Seed Color -->
+								<h5 class="mt-4 mb-2">Seed Color</h5>
+								<div class="color-row mb-3">
+									<div class="color-picker-container">
+										<div class="color-preview" id="seedColorPreview"></div>
+										<div class="color-dropdown" id="seedColorDropdown">
+											<color-picker color-space="oklch" no-preview="" no-sliders-labels=""></color-picker>
+										</div>
+									</div>
+									<input type="text" class="form-control" id="seedColorInput" placeholder="#6750A4" value="#6750A4">
+								</div>
+								
+								<!-- Style Selector -->
+								<h5 class="mt-4 mb-2">Style</h5>
+								<div class="mb-3">
+									<div class="text-muted small mb-2">Color scheme generation algorithm</div>
+									<div class="chip-container" id="styleChips">
+										<button class="chip active" data-value="TONAL_SPOT">Tonal Spot</button>
+										<button class="chip" data-value="VIBRANT">Vibrant</button>
+										<button class="chip" data-value="EXPRESSIVE">Expressive</button>
+										<button class="chip" data-value="NEUTRAL">Neutral</button>
+										<button class="chip" data-value="MONOCHROME">Monochrome</button>
+										<button class="chip" data-value="FIDELITY">Fidelity</button>
+										<button class="chip" data-value="CONTENT">Content</button>
+										<button class="chip" data-value="RAINBOW">Rainbow</button>
+										<button class="chip" data-value="FRUIT_SALAD">Fruit Salad</button>
 									</div>
 								</div>
-								<input type="text" class="form-control" id="seedColorInput" placeholder="#6750A4" value="#6750A4">
+								
+								<!-- Preserve Hue Option -->
+								<div class="form-check form-switch mb-4">
+									<input class="form-check-input" type="checkbox" id="preserveHueToggle">
+									<label class="form-check-label" for="preserveHueToggle">
+										Preserve hue in tonal palettes
+									</label>
+									<div class="text-muted small mt-1">
+										Applies OKLCH post-processing to fix hue shifting. May slightly reduce saturation in extreme tones.
+									</div>
+								</div>
+								<h5 class="mt-4 mb-2">Specification</h5>
+								<div class="mb-3">
+									<div class="chip-container" id="specChips">
+										<button class="chip active" data-value="SPEC_2025">2025</button>
+										<button class="chip" data-value="SPEC_2021">2021</button>
+									</div>
+								</div>
+								
+								<!-- Core Colors -->
+								<h5 class="mt-4 mb-2">Core Colors</h5>
+								<div class="mb-3">
+									<div class="text-muted small mb-2">Customize individual color roles (optional)</div>
+									<div id="coreColorsContainer" class="core-colors-container">
+										
+										<!-- Dynamic core color inputs will be added here -->
+									</div>
+								</div>
+								
+								<!-- Extended Colors -->
+								<h5 class="mt-4 mb-2">Extended Colors</h5>
+								<div id="extendedColorsContainer" class="extended-colors mb-3">
+									
+									<!-- Dynamic color inputs will be added here -->
+								</div>
+								<button id="addColorBtn" class="btn btn-outline-primary btn-sm mb-4">
+									Add a color
+								</button>
 							</div>
-							
-							
-							<!-- Style Selector -->
-						<h5 class="mt-4 mb-2">Style</h5>
-				<div class="mb-3">
-							<div class="text-muted small mb-2">Color scheme generation algorithm</div>
-							<div class="chip-container" id="styleChips">
-								<button class="chip active" data-value="TONAL_SPOT">Tonal Spot</button>
-								<button class="chip" data-value="VIBRANT">Vibrant</button>
-								<button class="chip" data-value="EXPRESSIVE">Expressive</button>
-								<button class="chip" data-value="NEUTRAL">Neutral</button>
-								<button class="chip" data-value="MONOCHROME">Monochrome</button>
-								<button class="chip" data-value="FIDELITY">Fidelity</button>
-								<button class="chip" data-value="CONTENT">Content</button>
-								<button class="chip" data-value="RAINBOW">Rainbow</button>
-								<button class="chip" data-value="FRUIT_SALAD">Fruit Salad</button>
-							</div>
-						</div>
-							
-							<!-- Color Specification -->
-						<h5 class="mt-4 mb-2">Specification</h5>
-			<div class="mb-3">
-						<div class="chip-container" id="specChips">
-							<button class="chip active" data-value="SPEC_2025">2025</button>
-							<button class="chip" data-value="SPEC_2021">2021</button>
-						</div>
-					</div>
-						
-						<!-- Core Colors -->
-						<h5 class="mt-4 mb-2">Core Colors</h5>
-						<div class="mb-3">
-							<div class="text-muted small mb-2">Customize individual color roles (optional)</div>
-							<div id="coreColorsContainer" class="core-colors-container">
-								<!-- Dynamic core color inputs will be added here -->
-							</div>
-						</div>
-						
-						<!-- Extended Colors -->
-							<h5 class="mt-4 mb-2">Extended Colors</h5>
-							<div id="extendedColorsContainer" class="extended-colors mb-3">
-								<!-- Dynamic color inputs will be added here -->
-							</div>
-							<button id="addColorBtn" class="btn btn-outline-primary btn-sm mb-4">
-								Add a color
-							</button>
-						</div>
-						
 						</div>
 					</div>
 				</div>
-			</div>
-		</main>
-		
-		<footer class="text-center mt-3 py-3">
-			<p class="mb-0">Powered by updated <a href="https://www.npmjs.com/package/@materialx/material-color-utilities" target="_blank" class="text-decoration-none">Material Color Utilities</a> v0.4.8, 29 Sept 2025.</p>
-			<p class="mb-0">
-				<a href="https://github.com/vasiliy-dudin/better-material-theme-builder/issues" target="_blank" class="text-decoration-none">Report Issue</a>
-				· Made by <a href="https://dudin.design" target="_blank" class="text-decoration-none">Vasya Dudin</a>
-			</p>
-		</footer>
-	</div>
-	
-	<!-- Floating Get JSON Button -->
-	<button id="getJsonBtn" class="get-json-btn">
-		<span>Get JSON</span>
-		<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-			<path d="M9 18l6-6-6-6"/>
-		</svg>
-	</button>
-	
-	<!-- JSON Results Drawer -->
-	<div id="jsonDrawer" class="json-drawer">
-		<div class="drawer-header">
-			<h3>JSON Results</h3>
-			<button id="closeDrawerBtn" class="close-drawer-btn">
-				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-					<line x1="18" y1="6" x2="6" y2="18"></line>
-					<line x1="6" y1="6" x2="18" y2="18"></line>
-				</svg>
-			</button>
+			</main>
+			<footer class="text-center mt-3 py-3">
+				<p class="mb-0">Powered by updated
+					<a href="https://www.npmjs.com/package/@materialx/material-color-utilities" target="_blank" class="text-decoration-none">Material Color Utilities</a>
+					v0.4.8, 29 Sept 2025.</p>
+				<p class="mb-0">
+					<a href="https://github.com/vasiliy-dudin/better-material-theme-builder/issues" target="_blank" class="text-decoration-none">Report Issue</a>
+					· Made by
+					<a href="https://dudin.design" target="_blank" class="text-decoration-none">Vasya Dudin</a>
+				</p>
+			</footer>
 		</div>
 		
-		<div class="drawer-content">
-			<h5 class="mb-3">Options</h5>
-			<div class="form-check form-switch mb-3">
-				<input class="form-check-input" type="checkbox" id="stateLayersToggle" checked>
-				<label class="form-check-label" for="stateLayersToggle">
-					State Layers
-				</label>
+		<!-- Floating Get JSON Button -->
+		<button id="getJsonBtn" class="get-json-btn">
+			<span>Get JSON</span>
+			<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+				<path d="M9 18l6-6-6-6"></path>
+			</svg>
+		</button>
+		
+		<!-- JSON Results Drawer -->
+		<div id="jsonDrawer" class="json-drawer">
+			<div class="drawer-header">
+				<h3>JSON Results</h3>
+				<button id="closeDrawerBtn" class="close-drawer-btn">
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<line x1="18" y1="6" x2="6" y2="18"></line>
+						<line x1="6" y1="6" x2="18" y2="18"></line>
+					</svg>
+				</button>
 			</div>
-			<div class="form-check form-switch mb-3">
-				<input class="form-check-input" type="checkbox" id="tonalPalettesToggle" checked>
-				<label class="form-check-label" for="tonalPalettesToggle">
-					Tonal Palettes
-				</label>
-			</div>
-			<div class="form-check form-switch mb-3 d-flex align-items-start">
-				<input class="form-check-input mt-1" type="checkbox" id="w3cFormatToggle" checked>
-				<div class="d-flex flex-column">
-					<label class="form-check-label mb-0" for="w3cFormatToggle">W3C Design Tokens Format</label>
-					<small class="text-muted" style="font-size: 0.8rem; line-height: 1.2;">Compatible with Figma variables import via "Luckino - Variables Import/Export JSON & CSS" plugin.</small>
+			<div class="drawer-content">
+				<h5 class="mb-3">Options</h5>
+				<div class="form-check form-switch mb-3">
+					<input class="form-check-input" type="checkbox" id="stateLayersToggle" checked="">
+					<label class="form-check-label" for="stateLayersToggle">
+						State Layers
+					</label>
 				</div>
-			</div>
-			<div class="naming-format-group mb-4">
-				<label for="namingFormat" class="form-label">Naming Format</label>
-				<select id="namingFormat" class="form-select">
-					<option value="kebab-case" selected>kebab-case</option>
-					<option value="camelCase">camelCase</option>
-					<option value="Title Case">Title Case</option>
-				</select>
-			</div>
-			<div class="collection-name-group mb-4" id="collectionNameGroup">
-				<label for="collectionName" class="form-label">Collection Name</label>
-				<input 
-					type="text" 
-					id="collectionName" 
-					class="form-control" 
-					placeholder="Semantic colors" 
-					value="Semantic colors"
-				/>
-			</div>
-			
-			<div class="d-flex justify-content-between align-items-center mt-5 mb-2">
-				<h5 class="mb-0">JSON</h5>
-				<div class="d-flex gap-2">
-					<button id="copyBtn" class="btn btn-secondary btn-sm">
-						Copy
-					</button>
-					<button id="downloadBtn" class="btn btn-secondary btn-sm">
-						Download JSON
-					</button>
+				<div class="form-check form-switch mb-3">
+					<input class="form-check-input" type="checkbox" id="tonalPalettesToggle" checked="">
+					<label class="form-check-label" for="tonalPalettesToggle">
+						Tonal Palettes
+					</label>
 				</div>
+				<div class="form-check form-switch mb-3 d-flex align-items-start">
+					<input class="form-check-input mt-1" type="checkbox" id="w3cFormatToggle" checked="">
+					<div class="d-flex flex-column">
+						<label class="form-check-label mb-0" for="w3cFormatToggle">W3C Design Tokens Format</label>
+						<small class="text-muted" style="font-size: 0.8rem; line-height: 1.2;">Compatible with Figma variables import via "Luckino - Variables Import/Export JSON &amp; CSS" plugin.</small>
+					</div>
+				</div>
+				<div class="naming-format-group mb-4">
+					<label for="namingFormat" class="form-label">Naming Format</label>
+					<select id="namingFormat" class="form-select">
+						<option value="kebab-case" selected="">kebab-case</option>
+						<option value="camelCase">camelCase</option>
+						<option value="Title Case">Title Case</option>
+					</select>
+				</div>
+				<div class="collection-name-group mb-4" id="collectionNameGroup">
+					<label for="collectionName" class="form-label">Collection Name</label>
+					<input type="text" id="collectionName" class="form-control" placeholder="Semantic colors" value="Semantic colors">
+				</div>
+				<div class="d-flex justify-content-between align-items-center mt-5 mb-2">
+					<h5 class="mb-0">JSON</h5>
+					<div class="d-flex gap-2">
+						<button id="copyBtn" class="btn btn-secondary btn-sm">
+							Copy
+						</button>
+						<button id="downloadBtn" class="btn btn-secondary btn-sm">
+							Download JSON
+						</button>
+					</div>
+				</div>
+				<pre id="jsonOutput" class="json-output"></pre>
 			</div>
-			<pre id="jsonOutput" class="json-output"></pre>
 		</div>
-	</div>
-	
-	<!-- Drawer Backdrop -->
-	<div id="drawerBackdrop" class="drawer-backdrop"></div>
-	
-	<script defer="defer" data-domain="vasiliy-dudin.github.io" src="https://analytics.dudin.design/js/script.js"></script>
-	<script src="https://elements.colorjs.io/src/color-picker/color-picker.js" type="module"></script>
-	<script type="module" src="app.js"></script>
-</body>
+		
+		<!-- Drawer Backdrop -->
+		<div id="drawerBackdrop" class="drawer-backdrop"></div>
+		<script defer="defer" data-domain="vasiliy-dudin.github.io" src="https://analytics.dudin.design/js/script.js"></script>
+		<script src="https://elements.colorjs.io/src/color-picker/color-picker.js" type="module"></script>
+		<script type="module" src="app.js"></script>
+	</body>
 </html>
