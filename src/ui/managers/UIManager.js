@@ -3,7 +3,7 @@ import { DrawerManager } from './DrawerManager.js';
 import { ExtendedColorsManager } from './ExtendedColorsManager.js';
 import { CoreColorsManager } from './CoreColorsManager.js';
 import { ExportManager } from './ExportManager.js';
-import { DEFAULT_SEED_COLOR, DEFAULT_STYLE, DEFAULT_SPEC } from '../../constants/materialDesign.js';
+import { DEFAULT_SEED_COLOR, DEFAULT_STYLE, DEFAULT_SPEC, DEFAULT_PRESERVE_HUE } from '../../constants/materialDesign.js';
 
 /**
  * Main UI Manager that coordinates all UI components
@@ -40,6 +40,7 @@ export class UIManager {
 		this.seedColorDropdown = document.getElementById('seedColorDropdown');
 		this.styleChips = document.getElementById('styleChips');
 		this.specChips = document.getElementById('specChips');
+		this.preserveHueToggle = document.getElementById('preserveHueToggle');
 		
 		// Track current selections
 		this.currentStyle = DEFAULT_STYLE;
@@ -61,6 +62,9 @@ export class UIManager {
 		
 		// Chip selectors
 		this.bindChipEvents();
+		
+		// Preserve hue toggle
+		this.bindPreserveHueToggle();
 		
 		// Initialize core colors UI
 		await this.coreColorsManager.initialize();
@@ -145,6 +149,13 @@ export class UIManager {
 	}
 	
 	/**
+	 * Get preserve hue setting
+	 */
+	getPreserveHue() {
+		return this.preserveHueToggle?.checked ?? DEFAULT_PRESERVE_HUE;
+	}
+	
+	/**
 	 * Get all color configuration settings
 	 */
 	getColorSettings() {
@@ -152,6 +163,7 @@ export class UIManager {
 			seedColor: this.getSeedColor(),
 			style: this.getStyle(),
 			colorSpec: this.getColorSpec(),
+			preserveHue: this.getPreserveHue(),
 			customCoreColors: this.coreColorsManager.getCustomCoreColors()
 		};
 	}
@@ -335,6 +347,17 @@ export class UIManager {
 	}
 	
 	/**
+	 * Bind preserve hue toggle event
+	 */
+	bindPreserveHueToggle() {
+		if (this.preserveHueToggle) {
+			this.preserveHueToggle.addEventListener('change', () => {
+				this.onGenerate?.();
+			});
+		}
+	}
+	
+	/**
 	 * Update chip selection state
 	 */
 	updateChipSelection(containerId, activeValue) {
@@ -374,6 +397,9 @@ export class UIManager {
 			this.currentSpec = settings.colorSpec;
 			this.updateChipSelection('specChips', settings.colorSpec);
 		}
+		if (settings.preserveHue !== undefined && this.preserveHueToggle) {
+			this.preserveHueToggle.checked = settings.preserveHue;
+		}
 
 		// Delegate to managers
 		if (settings.customCoreColors) this.coreColorsManager.setCustomCoreColors(settings.customCoreColors);
@@ -389,6 +415,7 @@ export class UIManager {
 			seedColor: this.getSeedColor(),
 			style: this.getStyle(),
 			colorSpec: this.getColorSpec(),
+			preserveHue: this.getPreserveHue(),
 			customCoreColors: this.coreColorsManager.getCustomCoreColors(),
 			extendedColors: this.getExtendedColors(),
 			exportSettings: {

@@ -1,4 +1,4 @@
-import { DEFAULT_SEED_COLOR, DEFAULT_STYLE, DEFAULT_SPEC } from '../../constants/materialDesign.js';
+import { DEFAULT_SEED_COLOR, DEFAULT_STYLE, DEFAULT_SPEC, DEFAULT_PRESERVE_HUE } from '../../constants/materialDesign.js';
 
 /**
  * Simple URL parameters manager
@@ -16,6 +16,7 @@ export class URLManager {
 			seedColor: params.get('seed'),
 			style: params.get('style'),
 			colorSpec: params.get('spec'),
+			preserveHue: params.get('preserveHue') === '1',
 			customCoreColors: this.parseCore(params.get('core')),
 			extendedColors: this.parseExtended(params.get('extended')),
 			exportSettings: {
@@ -39,6 +40,7 @@ export class URLManager {
 			if (settings.seedColor && settings.seedColor !== DEFAULT_SEED_COLOR) params.set('seed', settings.seedColor);
 			if (settings.style && settings.style !== DEFAULT_STYLE) params.set('style', settings.style);
 			if (settings.colorSpec && settings.colorSpec !== DEFAULT_SPEC) params.set('spec', settings.colorSpec);
+			if (settings.preserveHue !== DEFAULT_PRESERVE_HUE) params.set('preserveHue', settings.preserveHue ? '1' : '0');
 			
 			// Core colors
 			if (settings.customCoreColors && Object.keys(settings.customCoreColors).length > 0) {

@@ -31,6 +31,7 @@ export const CORE_COLOR_TYPES = [
 export const DEFAULT_SEED_COLOR = '#6750A4';
 export const DEFAULT_STYLE = 'TONAL_SPOT';
 export const DEFAULT_SPEC = 'SPEC_2025';
+export const DEFAULT_PRESERVE_HUE = false;
 
 export const STATE_LAYER_OPACITIES = {
 	hover: 0.08,

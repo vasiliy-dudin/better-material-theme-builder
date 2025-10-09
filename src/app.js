@@ -1,5 +1,6 @@
 import { buildFromUI } from './utils/validators.js';
 import { MaterialColorGenerator } from './utils/MaterialColorGenerator.js';
+import { OKLCHPostProcessor } from './utils/OKLCHPostProcessor.js';
 import { UIManager } from './ui/managers/UIManager.js';
 import { URLManager } from './ui/managers/URLManager.js';
 import { FormatUtils } from './utils/format.js';
@@ -139,7 +140,22 @@ class MaterialColorApp {
 			this.updateDefaultCoreColors(parsedData);
 
 			// Generate color scheme
-			const result = await this.colorGenerator.generateColorScheme(parsedData, extendedColors);
+			let result = await this.colorGenerator.generateColorScheme(parsedData, extendedColors);
+
+			// Apply OKLCH post-processing if preserveHue is enabled
+			if (colorSettings.preserveHue && result.tonalPalettes) {
+				// Process all chromatic palettes (excluding achromatic neutral/neutralVariant)
+				// These palettes will be automatically skipped if they have NaN hue,
+				// but filtering them out improves performance
+				const palettesToProcess = Object.keys(result.tonalPalettes).filter(
+					name => name !== 'neutral' && name !== 'neutralVariant'
+				);
+				
+				result = OKLCHPostProcessor.processColorScheme(result, {
+					preserveHue: true,
+					affectedPalettes: palettesToProcess
+				});
+			}
 
 			// Save as new original result
 			this.uiManager.displayResult(result, true);
