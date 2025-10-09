@@ -31,6 +31,9 @@ export class OKLCHPostProcessor {
 
 		// Deep clone the scheme to avoid mutations
 		const processedScheme = JSON.parse(JSON.stringify(colorScheme));
+		
+		// Keep original palettes for tone matching
+		const originalPalettes = { ...colorScheme.tonalPalettes };
 
 		// Process each affected palette
 		for (const paletteName of affectedPalettes) {
@@ -43,14 +46,17 @@ export class OKLCHPostProcessor {
 		}
 
 		// Regenerate scheme colors from updated palettes
+		// Pass both original and processed palettes for accurate tone matching
 		if (processedScheme.schemes) {
 			processedScheme.schemes.light = this.regenerateSchemeColors(
 				processedScheme.schemes.light,
+				originalPalettes,
 				processedScheme.tonalPalettes,
 				false
 			);
 			processedScheme.schemes.dark = this.regenerateSchemeColors(
 				processedScheme.schemes.dark,
+				originalPalettes,
 				processedScheme.tonalPalettes,
 				true
 			);
@@ -142,16 +148,18 @@ export class OKLCHPostProcessor {
 	/**
 	 * Regenerate scheme colors from updated tonal palettes
 	 * Instead of using hardcoded tone mappings, we extract tones from the original colors
-	 * by finding which tone in the palette matches each color role best.
+	 * by finding which tone in the original palette matches each color role best,
+	 * then use that tone to get the color from the processed palette.
 	 * This preserves the variant-specific tone mappings (e.g., MONOCHROME uses different tones)
 	 * 
 	 * @param {Object} scheme - Original scheme colors
-	 * @param {Object} tonalPalettes - Updated tonal palettes
+	 * @param {Object} originalPalettes - Original tonal palettes (before processing)
+	 * @param {Object} processedPalettes - Processed tonal palettes (after OKLCH hue fix)
 	 * @param {boolean} isDark - Whether this is dark mode (unused but kept for API compatibility)
 	 * @returns {Object} Regenerated scheme colors
 	 */
-	static regenerateSchemeColors(scheme, tonalPalettes, isDark) {
-		if (!scheme || !tonalPalettes) {
+	static regenerateSchemeColors(scheme, originalPalettes, processedPalettes, isDark) {
+		if (!scheme || !originalPalettes || !processedPalettes) {
 			return scheme;
 		}
 
@@ -161,10 +169,27 @@ export class OKLCHPostProcessor {
 		// For each color role in the scheme, find its tone and update from processed palette
 		for (const [colorRole, originalHex] of Object.entries(scheme)) {
 			// Determine which palette this color role belongs to
-			const paletteName = colorRole.split(' ')[0];
+			// Color roles follow patterns:
+			// - "primary" → palette: "primary"
+			// - "on primary" → palette: "primary"
+			// - "primary container" → palette: "primary"
+			// - "on primary container" → palette: "primary"
+			// - "warning" → palette: "warning"
+			// - "on warning" → palette: "warning"
+			let paletteName = colorRole;
 			
-			// Skip if we don't have a processed palette for this role
-			if (!tonalPalettes[paletteName]) continue;
+			// Remove "on " prefix if present
+			if (paletteName.startsWith('on ')) {
+				paletteName = paletteName.substring(3); // Remove "on "
+			}
+			
+			// Remove " container" suffix if present
+			if (paletteName.endsWith(' container')) {
+				paletteName = paletteName.replace(' container', '');
+			}
+			
+			// Skip if we don't have palettes for this role
+			if (!originalPalettes[paletteName] || !processedPalettes[paletteName]) continue;
 			
 			// Find the closest tone in the ORIGINAL palette that matches this color
 			// We use OKLCH lightness for comparison as it's perceptually uniform
@@ -174,11 +199,11 @@ export class OKLCHPostProcessor {
 			const originalLightness = originalOklch.l;
 			
 			// Find the tone value that best matches this lightness
-			// by comparing against the processed palette's tone values
+			// by comparing against the ORIGINAL palette's tone values
 			let closestTone = null;
 			let minDifference = Infinity;
 			
-			for (const [tone, hexColor] of Object.entries(tonalPalettes[paletteName])) {
+			for (const [tone, hexColor] of Object.entries(originalPalettes[paletteName])) {
 				const toneOklch = toOklch(hexColor);
 				if (!toneOklch) continue;
 				
@@ -189,9 +214,9 @@ export class OKLCHPostProcessor {
 				}
 			}
 			
-			// Update with the color from the processed palette at the matched tone
-			if (closestTone !== null && tonalPalettes[paletteName][closestTone]) {
-				regenerated[colorRole] = tonalPalettes[paletteName][closestTone];
+			// Update with the color from the PROCESSED palette at the matched tone
+			if (closestTone !== null && processedPalettes[paletteName][closestTone]) {
+				regenerated[colorRole] = processedPalettes[paletteName][closestTone];
 			}
 		}
 

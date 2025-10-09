@@ -145,8 +145,10 @@ class MaterialColorApp {
 			// Apply OKLCH post-processing if preserveHue is enabled
 			if (colorSettings.preserveHue && result.tonalPalettes) {
 				// Process all chromatic palettes (excluding achromatic neutral/neutralVariant)
-				// These palettes will be automatically skipped if they have NaN hue,
-				// but filtering them out improves performance
+				// All palettes except neutral and neutralVariant should be processed:
+				// - primary, secondary, tertiary (core chromatic colors)
+				// - error (chromatic red color)
+				// - extended colors (warning, success, etc.)
 				const palettesToProcess = Object.keys(result.tonalPalettes).filter(
 					name => name !== 'neutral' && name !== 'neutralVariant'
 				);
