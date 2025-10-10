@@ -1,4 +1,4 @@
-import { validateHexColor, isValidHexColor } from '../../utils/validators.js';
+import { isValidHexColor } from '../../utils/validators.js';
 
 /**
  * Manager for extended colors functionality
@@ -83,7 +83,7 @@ export class ExtendedColorsManager {
 	/**
 	 * Bind events for extended color inputs
 	 */
-	async bindExtendedColorEvents(colorDiv, colorId) {
+	async bindExtendedColorEvents(colorDiv, _colorId) {
 		const nameInput = colorDiv.querySelector('.color-name-input');
 		const hexInput = colorDiv.querySelector('.color-hex-input');
 		const removeBtn = colorDiv.querySelector('.remove-color-btn');

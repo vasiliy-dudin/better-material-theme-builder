@@ -71,7 +71,7 @@ export class ColorPickerManager {
 				// Fallback: try to set as string
 				colorPicker.setAttribute('color', color);
 			}
-		} catch (error) {
+		} catch (_error) {
 			// Final fallback: set as attribute
 			colorPicker.setAttribute('color', color);
 		}
@@ -96,7 +96,7 @@ export class ColorPickerManager {
 
 		// Backup input and change events
 		['input', 'change'].forEach(eventType => {
-			colorPicker.addEventListener(eventType, (e) => {
+			colorPicker.addEventListener(eventType, (_e) => {
 				try {
 					const color = colorPicker.color ? colorPicker.color.toString({ format: 'hex' }) : colorPicker.value;
 					if (color) {
@@ -127,7 +127,7 @@ export class ColorPickerManager {
 						// Fallback: try to set as string
 						colorPicker.setAttribute('color', color);
 					}
-				} catch (error) {
+				} catch (_error) {
 					// Final fallback: set as attribute
 					colorPicker.setAttribute('color', color);
 				}

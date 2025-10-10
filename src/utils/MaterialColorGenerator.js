@@ -8,8 +8,7 @@ import {
 	SpecVersion,
 	MaterialDynamicColors,
 	TonalPalette,
-	Blend,
-	DynamicColor
+	Blend
 } from '@materialx/material-color-utilities';
 
 import {
@@ -357,7 +356,7 @@ export class MaterialColorGenerator {
 	 * @param {DynamicScheme} lightScheme - Light dynamic scheme (unused now)
 	 * @param {DynamicScheme} darkScheme - Dark dynamic scheme (unused now)
 	 */
-	processExtendedColors(extendedColors, lightColors, darkColors, lightStateLayers, darkStateLayers, tonalPalettes, seedColorArgb, lightScheme, darkScheme) {
+	processExtendedColors(extendedColors, lightColors, darkColors, lightStateLayers, darkStateLayers, tonalPalettes, seedColorArgb, _lightScheme, _darkScheme) {
 		if (extendedColors.length === 0) return;
 		
 		// Prepare custom colors for themeFromSourceColor API

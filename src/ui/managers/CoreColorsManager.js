@@ -1,5 +1,5 @@
 import { CORE_COLOR_TYPES } from '../../constants/materialDesign.js';
-import { validateHexColor, isValidHexColor } from '../../utils/validators.js';
+import { isValidHexColor } from '../../utils/validators.js';
 
 /**
  * Manager for core colors functionality
