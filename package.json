@@ -7,7 +7,9 @@
 		"build+deploy": "npm run build && npm run deploy",
 		"build": "vite build",
 		"preview": "vite preview",
-		"deploy": "npm run build && echo. > dist/.nojekyll && gh-pages -d dist"
+		"deploy": "npm run build && echo. > dist/.nojekyll && gh-pages -d dist",
+		"lint": "eslint src/**/*.js",
+		"lint:fix": "eslint src/**/*.js --fix"
 	},
 	"dependencies": {
 		"@materialx/material-color-utilities": "^0.4.8",
@@ -15,6 +17,8 @@
 		"vite": "^7.1.9"
 	},
 	"devDependencies": {
+		"@eslint/js": "^9.37.0",
+		"eslint": "^9.37.0",
 		"gh-pages": "^6.3.0"
 	}
 }
