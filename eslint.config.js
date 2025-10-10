@@ -18,10 +18,17 @@ export default [
 				URLSearchParams: 'readonly',
 				navigator: 'readonly',
 				localStorage: 'readonly',
+				setTimeout: 'readonly',
+				clearTimeout: 'readonly',
+				Blob: 'readonly',
 			},
 		},
 		rules: {
-			'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+			'no-unused-vars': ['warn', { 
+				argsIgnorePattern: '^_', 
+				varsIgnorePattern: '^_',
+				caughtErrorsIgnorePattern: '^_'
+			}],
 			'no-console': 'off',
 		},
 	},
