@@ -286,13 +286,44 @@ export class OKLCHPostProcessor {
 			
 			// Lowercase first letter to match palette names
 			paletteName = paletteName.charAt(0).toLowerCase() + paletteName.slice(1);
+		
+			// Map surface-related colors to their source palettes
+			// Surface colors don't have their own palettes - they're derived from neutral/neutralVariant
+			const paletteMapping = {
+				'surface': 'neutral',
+				'surfaceDim': 'neutral',
+				'surfaceBright': 'neutral',
+				'surfaceContainerLowest': 'neutral',
+				'surfaceContainerLow': 'neutral',
+				'surfaceContainerHigh': 'neutral',
+				'surfaceContainerHighest': 'neutral',
+				'surfaceVariant': 'neutralVariant',
+				'outline': 'neutralVariant',
+				'outlineVariant': 'neutralVariant',
+				'background': 'neutral',
+				'inverseSurface': 'neutral',
+				'inverseOnSurface': 'neutral',
+				'inversePrimary': 'primary',
+				'scrim': null,
+				'shadow': null
+			};
+			
+			const mappedPaletteName = paletteMapping[paletteName] || paletteName;
+			
+			// Skip colors that don't use palettes (scrim, shadow - always black)
+			if (mappedPaletteName === null) {
+				skippedCount++;
+				const reason = 'not palette-based';
+				skippedReasons[reason] = (skippedReasons[reason] || 0) + 1;
+				continue;
+			}
 			
 			// Skip if we don't have palettes for this role
-			if (!originalPalettes[paletteName] || !processedPalettes[paletteName]) {
+			if (!originalPalettes[mappedPaletteName] || !processedPalettes[mappedPaletteName]) {
 				skippedCount++;
-				const reason = `no palette: ${paletteName}`;
+				const reason = `no palette: ${mappedPaletteName}`;
 				skippedReasons[reason] = (skippedReasons[reason] || 0) + 1;
-				console.log(`[OKLCH] SKIP ${colorRole}: palette="${paletteName}" not found`);
+				console.log(`[OKLCH] SKIP ${colorRole}: palette="${paletteName}" → "${mappedPaletteName}" not found`);
 				continue;
 			}
 			
@@ -308,7 +339,7 @@ export class OKLCHPostProcessor {
 			let closestTone = null;
 			let minDifference = Infinity;
 			
-			for (const [tone, hexColor] of Object.entries(originalPalettes[paletteName])) {
+			for (const [tone, hexColor] of Object.entries(originalPalettes[mappedPaletteName])) {
 				const toneOklch = toOklch(hexColor);
 				if (!toneOklch) continue;
 				
@@ -320,8 +351,8 @@ export class OKLCHPostProcessor {
 			}
 			
 			// Update with the color from the PROCESSED palette at the matched tone
-			if (closestTone !== null && processedPalettes[paletteName][closestTone]) {
-				const newHex = processedPalettes[paletteName][closestTone];
+			if (closestTone !== null && processedPalettes[mappedPaletteName][closestTone]) {
+				const newHex = processedPalettes[mappedPaletteName][closestTone];
 				const changed = newHex !== originalHex;
 				
 				if (changed) {
@@ -338,7 +369,7 @@ export class OKLCHPostProcessor {
 				if (shouldLog) {
 					console.log(
 						`[OKLCH] ${colorRole}: ${originalHex} → ${newHex} ` +
-						`(palette: ${paletteName}, tone: ${closestTone}, changed: ${changed})`
+						`(palette: ${paletteName}→${mappedPaletteName}, tone: ${closestTone}, changed: ${changed})`
 					);
 				}
 				
