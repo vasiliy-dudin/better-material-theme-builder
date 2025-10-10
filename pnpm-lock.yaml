@@ -11,6 +11,9 @@ importers:
       '@materialx/material-color-utilities':
         specifier: ^0.4.8
         version: 0.4.8
+      culori:
+        specifier: ^4.0.2
+        version: 4.0.2
       vite:
         specifier: ^7.1.9
         version: 7.1.9
@@ -322,6 +325,10 @@ packages:
 
   commondir@1.0.1:
     resolution: {integrity: sha512-W9pAhw0ja1Edb5GVdIF1mjZw/ASI0AlShXM83UUGe2DVr5TdAPEA1OA8m/g8zWp9x6On7gqufY+FatDbC3MDQg==}
+
+  culori@4.0.2:
+    resolution: {integrity: sha512-1+BhOB8ahCn4O0cep0Sh2l9KCOfOdY+BXJnKMHFFzDEouSr/el18QwXEMRlOj9UY5nCeA8UN3a/82rUWRBeyBw==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
   dir-glob@3.0.1:
     resolution: {integrity: sha512-WkrWp9GR4KXfKGYzOLmTuGVi1UWFfws377n9cc55/tb6DuqyF6pcQ5AbiHEshaDpY9v6oaSr2XCDidGmMwdzIA==}
@@ -739,6 +746,8 @@ snapshots:
   commander@13.1.0: {}
 
   commondir@1.0.1: {}
+
+  culori@4.0.2: {}
 
   dir-glob@3.0.1:
     dependencies:
