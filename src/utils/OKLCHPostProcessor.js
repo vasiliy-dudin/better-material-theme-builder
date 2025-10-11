@@ -10,6 +10,26 @@ import { formatHex, converter, inGamut, clampChroma } from 'culori';
  * Uses culori library for all OKLCH operations.
  */
 export class OKLCHPostProcessor {
+	// Map color roles to their source palettes
+	static PALETTE_MAPPING = {
+		'surface': 'neutral',
+		'surfaceDim': 'neutral',
+		'surfaceBright': 'neutral',
+		'surfaceContainerLowest': 'neutral',
+		'surfaceContainerLow': 'neutral',
+		'surfaceContainerHigh': 'neutral',
+		'surfaceContainerHighest': 'neutral',
+		'surfaceVariant': 'neutralVariant',
+		'outline': 'neutralVariant',
+		'outlineVariant': 'neutralVariant',
+		'background': 'neutral',
+		'inverseSurface': 'neutral',
+		'inverseOnSurface': 'neutral',
+		'inversePrimary': 'primary',
+		'scrim': null,
+		'shadow': null
+	};
+
 	/**
 	 * Process a complete color scheme to preserve hue in tonal palettes
 	 * 
@@ -188,7 +208,7 @@ export class OKLCHPostProcessor {
 				`chroma ${chromaLoss >= 0 ? '-' : '+'}${Math.abs(chromaLoss).toFixed(1)}%)`
 			);
 
-			// Convert back to HEX (lowercase)
+			// Convert back to HEX
 			processedPalette[tone] = formatHex(result.color).toLowerCase();
 		}
 
@@ -223,20 +243,10 @@ export class OKLCHPostProcessor {
 			return { color: testColor, hueDeviation: 0 };
 		}
 
-		// Try with reduced chroma at exact hue
-		let clampedAtExactHue = clampChroma(testColor, 'oklch');
-		let bestColor;
-		let bestHueDeviation;
-		
-		if (clampedAtExactHue) {
-			// Store as fallback
-			bestColor = clampedAtExactHue;
-			bestHueDeviation = 0;
-		} else {
-			// Shouldn't happen, but just in case
-			bestColor = originalColor;
-			bestHueDeviation = Math.abs(originalColor.h - referenceHue);
-		}
+		// Try with reduced chroma at exact hue as fallback
+		const clampedAtExactHue = clampChroma(testColor, 'oklch');
+		let bestColor = clampedAtExactHue || originalColor;
+		let bestHueDeviation = clampedAtExactHue ? 0 : Math.abs((originalColor.h ?? 0) - referenceHue);
 
 		// Try hue variations to find better chroma preservation
 		for (let deviation = 1; deviation <= maxHueDeviation; deviation++) {
@@ -267,6 +277,38 @@ export class OKLCHPostProcessor {
 		}
 
 		return { color: bestColor, hueDeviation: bestHueDeviation };
+	}
+
+	/**
+	 * Extract palette name from color role
+	 * Handles both camelCase and space-separated formats
+	 * 
+	 * @param {string} colorRole - Color role name (e.g., "primary", "onPrimary", "on primary container")
+	 * @returns {string} Palette name
+	 */
+	static extractPaletteName(colorRole) {
+		let paletteName = colorRole;
+		
+		// Remove "on " prefix (space-separated format)
+		if (paletteName.startsWith('on ')) {
+			paletteName = paletteName.substring(3);
+		}
+		// Remove "on" prefix (camelCase format)
+		else if (paletteName.match(/^on[A-Z]/)) {
+			paletteName = paletteName.substring(2);
+		}
+		
+		// Remove " container" suffix (space-separated format)
+		if (paletteName.endsWith(' container')) {
+			paletteName = paletteName.slice(0, -10);
+		}
+		// Remove "Container" suffix (camelCase format)
+		else if (paletteName.endsWith('Container')) {
+			paletteName = paletteName.slice(0, -9);
+		}
+		
+		// Lowercase first letter to match palette names
+		return paletteName.charAt(0).toLowerCase() + paletteName.slice(1);
 	}
 
 	/**
@@ -302,55 +344,11 @@ export class OKLCHPostProcessor {
 				continue;
 			}
 			
-			// Determine which palette this color role belongs to
-			// Color roles can be in different formats:
-			// - camelCase: "primary", "onPrimary", "primaryContainer", "onPrimaryContainer"
-			// - space-separated: "primary", "on primary", "primary container", "on primary container"
-			let paletteName = colorRole;
+			// Extract palette name from color role
+			const paletteName = this.extractPaletteName(colorRole);
 			
-			// Remove "on " prefix (space-separated format)
-			if (paletteName.startsWith('on ')) {
-				paletteName = paletteName.substring(3); // "on primary" → "primary"
-			}
-			// Remove "on" prefix (camelCase format)
-			else if (paletteName.match(/^on[A-Z]/)) {
-				paletteName = paletteName.substring(2); // "onPrimary" → "Primary"
-			}
-			
-			// Remove " container" suffix (space-separated format) - MUST be before Container
-			if (paletteName.endsWith(' container')) {
-				paletteName = paletteName.slice(0, -10); // Remove " container"
-			}
-			// Remove "Container" suffix (camelCase format)
-			else if (paletteName.endsWith('Container')) {
-				paletteName = paletteName.slice(0, -9); // Remove "Container"
-			}
-			
-			// Lowercase first letter to match palette names
-			paletteName = paletteName.charAt(0).toLowerCase() + paletteName.slice(1);
-		
-			// Map surface-related colors to their source palettes
-			// Surface colors don't have their own palettes - they're derived from neutral/neutralVariant
-			const paletteMapping = {
-				'surface': 'neutral',
-				'surfaceDim': 'neutral',
-				'surfaceBright': 'neutral',
-				'surfaceContainerLowest': 'neutral',
-				'surfaceContainerLow': 'neutral',
-				'surfaceContainerHigh': 'neutral',
-				'surfaceContainerHighest': 'neutral',
-				'surfaceVariant': 'neutralVariant',
-				'outline': 'neutralVariant',
-				'outlineVariant': 'neutralVariant',
-				'background': 'neutral',
-				'inverseSurface': 'neutral',
-				'inverseOnSurface': 'neutral',
-				'inversePrimary': 'primary',
-				'scrim': null,
-				'shadow': null
-			};
-			
-			const mappedPaletteName = paletteMapping[paletteName] || paletteName;
+			// Map to actual palette (surface colors map to neutral/neutralVariant)
+			const mappedPaletteName = this.PALETTE_MAPPING[paletteName] || paletteName;
 			
 			// Skip colors that don't use palettes (scrim, shadow - always black)
 			if (mappedPaletteName === null) {
