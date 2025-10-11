@@ -37,13 +37,18 @@ export class OKLCHPostProcessor {
 		
 		// Keep original palettes for tone matching
 		const originalPalettes = { ...colorScheme.tonalPalettes };
+		
+		// Get source colors for hue reference
+		const sourceColors = colorScheme.sourceColors || {};
 
 		// Process each affected palette
 		for (const paletteName of affectedPalettes) {
 			if (processedScheme.tonalPalettes[paletteName]) {
+				const sourceColor = sourceColors[paletteName];
 				processedScheme.tonalPalettes[paletteName] = this.processPalette(
 					processedScheme.tonalPalettes[paletteName],
-					paletteName
+					paletteName,
+					sourceColor
 				);
 			}
 		}
@@ -65,6 +70,9 @@ export class OKLCHPostProcessor {
 			);
 		}
 
+		// Remove sourceColors from result - it's internal metadata, not for display
+		delete processedScheme.sourceColors;
+
 		return processedScheme;
 	}
 
@@ -72,33 +80,70 @@ export class OKLCHPostProcessor {
 	 * Process a single tonal palette to preserve hue
 	 * 
 	 * Strategy:
-	 * 1. Extract reference hue from middle tone (50)
+	 * 1. Extract reference hue from source color (the color that created this palette)
 	 * 2. For each tone, convert to OKLCH
 	 * 3. Replace hue with reference hue
 	 * 4. Ensure color stays in sRGB gamut by clamping chroma if needed
 	 * 
 	 * @param {Object} palette - Tonal palette object with tone values (e.g., {0: '#000', 10: '#1a1a1a', ...})
 	 * @param {string} paletteName - Name of the palette (for logging)
+	 * @param {string|null} sourceColor - Source color hex that created this palette
 	 * @returns {Object} Processed palette with preserved hue
 	 */
-	static processPalette(palette, paletteName) {
-		// Get reference hue from tone 50 (mid-tone, most representative)
-		const referenceTone = palette['50'];
-		if (!referenceTone) {
-			console.warn(`No tone 50 found in ${paletteName} palette`);
-			return palette;
-		}
-
+	static processPalette(palette, paletteName, sourceColor = null) {
 		// Convert reference color to OKLCH to extract hue
 		const toOklch = converter('oklch');
-		const referenceOklch = toOklch(referenceTone);
 		
-		if (!referenceOklch || referenceOklch.h === undefined || isNaN(referenceOklch.h)) {
-			console.warn(`Could not extract hue from ${paletteName} reference tone (achromatic color)`);
+		let referenceHue = null;
+		let hueSource = null;
+		
+		// If source color is provided, use its hue (most reliable)
+		if (sourceColor) {
+			const sourceOklch = toOklch(sourceColor);
+			if (sourceOklch && sourceOklch.h !== undefined && !isNaN(sourceOklch.h)) {
+				referenceHue = sourceOklch.h;
+				hueSource = `source color ${sourceColor}`;
+			}
+		}
+		
+		// Fallback: extract hue from palette tones (for backward compatibility)
+		if (referenceHue === null) {
+			let maxChroma = -1;
+			let referenceToneName = null;
+			
+			// Try tones in order of preference: 50 (middle), 40, 60, 30, 70, etc.
+			const tonePreference = [50, 40, 60, 30, 70, 20, 80, 10, 90];
+			
+			for (const tone of tonePreference) {
+				const toneKey = String(tone);
+				if (!palette[toneKey]) continue;
+				
+				const oklch = toOklch(palette[toneKey]);
+				if (!oklch || oklch.h === undefined || isNaN(oklch.h)) continue;
+				
+				// Use the first tone with reasonable chroma, or track the highest chroma
+				if (oklch.c > 0.02) {
+					// Found a tone with sufficient chroma
+					referenceHue = oklch.h;
+					referenceToneName = toneKey;
+					hueSource = `tone ${toneKey} (chroma: ${oklch.c.toFixed(3)})`;
+					break;
+				} else if (oklch.c > maxChroma) {
+					// Track the tone with highest chroma as fallback
+					maxChroma = oklch.c;
+					referenceHue = oklch.h;
+					referenceToneName = toneKey;
+					hueSource = `tone ${referenceToneName} (low chroma: ${maxChroma.toFixed(3)})`;
+				}
+			}
+		}
+		
+		if (referenceHue === null) {
+			console.warn(`[OKLCH] ${paletteName}: could not extract valid hue`);
 			return palette;
 		}
-
-		const referenceHue = referenceOklch.h;
+		
+		console.log(`[OKLCH] ${paletteName}: using hue ${referenceHue.toFixed(1)}° from ${hueSource}`);
 
 		// Process each tone with flexible hue preservation
 		const processedPalette = {};
@@ -113,11 +158,8 @@ export class OKLCHPostProcessor {
 				continue;
 			}
 
-			// Skip achromatic colors (chroma too low, hue is meaningless)
-			if (oklchColor.c < 0.001) {
-				processedPalette[tone] = hexColor;
-				continue;
-			}
+			// Process even low-chroma colors (neutral/neutralVariant) to fix hue
+			// Material Design's HCT can introduce unwanted hue shifts even in near-achromatic colors
 
 			// Adaptive hue deviation based on tone
 			// Middle tones (40-60) are most visible, so use stricter hue preservation
@@ -132,8 +174,8 @@ export class OKLCHPostProcessor {
 			);
 
 			// Log detailed information
-			const originalHue = oklchColor.h;
-			const actualHue = result.color.h;
+			const originalHue = oklchColor.h ?? 0;
+			const actualHue = result.color.h ?? 0;
 			const hueDeviation = Math.abs(actualHue - referenceHue);
 			const chromaLoss = ((oklchColor.c - result.color.c) / oklchColor.c * 100);
 			
@@ -146,8 +188,8 @@ export class OKLCHPostProcessor {
 				`chroma ${chromaLoss >= 0 ? '-' : '+'}${Math.abs(chromaLoss).toFixed(1)}%)`
 			);
 
-			// Convert back to HEX (uppercase to match Material Color Utilities format)
-			processedPalette[tone] = formatHex(result.color).toUpperCase();
+			// Convert back to HEX (lowercase)
+			processedPalette[tone] = formatHex(result.color).toLowerCase();
 		}
 
 		return processedPalette;
@@ -352,7 +394,30 @@ export class OKLCHPostProcessor {
 			
 			// Update with the color from the PROCESSED palette at the matched tone
 			if (closestTone !== null && processedPalettes[mappedPaletteName][closestTone]) {
-				const newHex = processedPalettes[mappedPaletteName][closestTone];
+				// Get the processed color (with corrected hue)
+				const processedHex = processedPalettes[mappedPaletteName][closestTone];
+				const processedOklch = toOklch(processedHex);
+				
+				// Preserve original lightness and chroma - only take the corrected hue
+				// This prevents colors from becoming too desaturated or changing brightness
+				let newHex = processedHex; // fallback
+				
+				if (processedOklch && originalOklch) {
+					let finalColor = {
+						mode: 'oklch',
+						l: originalOklch.l,  // Keep original lightness
+						c: originalOklch.c,  // Keep original chroma
+						h: processedOklch.h  // Use corrected hue from processed palette
+					};
+					
+					// Ensure the color is in sRGB gamut
+					if (!inGamut('rgb')(finalColor)) {
+						finalColor = clampChroma(finalColor, 'oklch');
+					}
+					
+					newHex = formatHex(finalColor).toLowerCase();
+				}
+				
 				const changed = newHex !== originalHex;
 				
 				if (changed) {
@@ -378,7 +443,7 @@ export class OKLCHPostProcessor {
 				skippedCount++;
 				const reason = closestTone === null ? 'no matching tone' : 'tone not in processed palette';
 				skippedReasons[reason] = (skippedReasons[reason] || 0) + 1;
-				console.log(`[OKLCH] SKIP ${colorRole}: ${reason}`);
+				console.log(`[OKLCH] SKIP ${colorRole}: ${reason} (palette: ${mappedPaletteName}, tone: ${closestTone})`);
 			}
 		}
 

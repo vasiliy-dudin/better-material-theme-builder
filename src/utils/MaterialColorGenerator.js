@@ -68,6 +68,9 @@ export class MaterialColorGenerator {
 				this.processExtendedColors(extendedColors, lightColors, darkColors, lightStateLayers, darkStateLayers, tonalPalettes, seedArgb, lightScheme, darkScheme);
 			}
 
+			// Collect source colors for each palette (for OKLCH post-processing)
+			const sourceColors = this.collectSourceColors(seedColor, customCoreColors, extendedColors);
+
 			return {
 				schemes: {
 					light: lightColors,
@@ -77,7 +80,8 @@ export class MaterialColorGenerator {
 					light: lightStateLayers,
 					dark: darkStateLayers
 				},
-				tonalPalettes: tonalPalettes
+				tonalPalettes: tonalPalettes,
+				sourceColors: sourceColors
 			};
 
 		} catch (error) {
@@ -476,5 +480,33 @@ export class MaterialColorGenerator {
 			neutral: hexFromArgb(lightScheme.neutralPalette.tone(50)),
 			neutralVariant: hexFromArgb(lightScheme.neutralVariantPalette.tone(50))
 		};
+	}
+
+	/**
+	 * Collect source colors for each palette
+	 * Maps palette names to their source colors (used for OKLCH hue reference)
+	 * @param {string} seedColor - Seed color hex
+	 * @param {Object} customCoreColors - Custom core color overrides
+	 * @param {Array} extendedColors - Extended colors array
+	 * @returns {Object} Map of palette name to source color hex
+	 */
+	collectSourceColors(seedColor, customCoreColors = {}, extendedColors = []) {
+		const sourceColors = {};
+		
+		// Core colors: use custom if provided, otherwise seed color
+		sourceColors.primary = customCoreColors.primary || seedColor;
+		sourceColors.secondary = customCoreColors.secondary || seedColor;
+		sourceColors.tertiary = customCoreColors.tertiary || seedColor;
+		sourceColors.error = customCoreColors.error || seedColor;
+		sourceColors.neutral = customCoreColors.neutral || seedColor;
+		sourceColors.neutralVariant = customCoreColors.neutralVariant || seedColor;
+		
+		// Extended colors: use their own color
+		for (const extendedColor of extendedColors) {
+			const paletteName = this.sanitizeColorName(extendedColor.name);
+			sourceColors[paletteName] = extendedColor.color;
+		}
+		
+		return sourceColors;
 	}
 }

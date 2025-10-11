@@ -145,23 +145,21 @@ class MaterialColorApp {
 			// Apply OKLCH post-processing if preserveHue is enabled
 			if (colorSettings.preserveHue && result.tonalPalettes) {
 				// Process ALL tonal palettes to preserve hue consistency
+				// Each palette uses hue from its own source color (seed or core color)
 				// This includes:
-				// - primary, secondary, tertiary (core chromatic colors)
-				// - error (chromatic red color)
-				// - neutral, neutralVariant (achromatic grays - will have minimal effect)
+				// - primary, secondary, tertiary, error (chromatic core colors)
+				// - neutral, neutralVariant (low-chroma - use tone with highest chroma for stable hue)
 				// - extended colors (warning, success, etc.)
 				const palettesToProcess = Object.keys(result.tonalPalettes);
-				
+			
 				result = OKLCHPostProcessor.processColorScheme(result, {
 					preserveHue: true,
 					affectedPalettes: palettesToProcess
 				});
 			}
 
-			// Save as new original result
+			// Display result - this saves as original and applies current format
 			this.uiManager.displayResult(result, true);
-			
-			// Apply current format settings to preserve user's toggle states
 			this.updateResultFormat();
 			
 			// Save current settings to URL
