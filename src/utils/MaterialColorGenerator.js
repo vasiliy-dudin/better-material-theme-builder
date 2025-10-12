@@ -108,30 +108,74 @@ export class MaterialColorGenerator {
 			specVersion: specVersion
 		};
 
-		// Add custom palettes if they exist
+		// Generate palettes for custom colors using Material Design rules
+		// Instead of using full chroma, generate temporary scheme to get proper palette
+		// This ensures container colors have correct saturation levels
 		if (customColors.primary) {
 			const primaryHct = Hct.fromInt(argbFromHex(customColors.primary));
-			schemeOptions.primaryPalette = TonalPalette.fromHueAndChroma(primaryHct.hue, primaryHct.chroma);
+			const tempScheme = DynamicScheme.from({
+				sourceColorHct: primaryHct,
+				variant: variant,
+				isDark: isDark,
+				contrastLevel: 0.0,
+				specVersion: specVersion
+			});
+			schemeOptions.primaryPalette = tempScheme.primaryPalette;
 		}
 		if (customColors.secondary) {
 			const secondaryHct = Hct.fromInt(argbFromHex(customColors.secondary));
-			schemeOptions.secondaryPalette = TonalPalette.fromHueAndChroma(secondaryHct.hue, secondaryHct.chroma);
+			const tempScheme = DynamicScheme.from({
+				sourceColorHct: secondaryHct,
+				variant: variant,
+				isDark: isDark,
+				contrastLevel: 0.0,
+				specVersion: specVersion
+			});
+			schemeOptions.secondaryPalette = tempScheme.secondaryPalette;
 		}
 		if (customColors.tertiary) {
 			const tertiaryHct = Hct.fromInt(argbFromHex(customColors.tertiary));
-			schemeOptions.tertiaryPalette = TonalPalette.fromHueAndChroma(tertiaryHct.hue, tertiaryHct.chroma);
+			const tempScheme = DynamicScheme.from({
+				sourceColorHct: tertiaryHct,
+				variant: variant,
+				isDark: isDark,
+				contrastLevel: 0.0,
+				specVersion: specVersion
+			});
+			schemeOptions.tertiaryPalette = tempScheme.tertiaryPalette;
 		}
 		if (customColors.error) {
 			const errorHct = Hct.fromInt(argbFromHex(customColors.error));
-			schemeOptions.errorPalette = TonalPalette.fromHueAndChroma(errorHct.hue, errorHct.chroma);
+			const tempScheme = DynamicScheme.from({
+				sourceColorHct: errorHct,
+				variant: variant,
+				isDark: isDark,
+				contrastLevel: 0.0,
+				specVersion: specVersion
+			});
+			schemeOptions.errorPalette = tempScheme.errorPalette;
 		}
 		if (customColors.neutral) {
 			const neutralHct = Hct.fromInt(argbFromHex(customColors.neutral));
-			schemeOptions.neutralPalette = TonalPalette.fromHueAndChroma(neutralHct.hue, neutralHct.chroma);
+			const tempScheme = DynamicScheme.from({
+				sourceColorHct: neutralHct,
+				variant: variant,
+				isDark: isDark,
+				contrastLevel: 0.0,
+				specVersion: specVersion
+			});
+			schemeOptions.neutralPalette = tempScheme.neutralPalette;
 		}
 		if (customColors.neutralVariant) {
 			const neutralVariantHct = Hct.fromInt(argbFromHex(customColors.neutralVariant));
-			schemeOptions.neutralVariantPalette = TonalPalette.fromHueAndChroma(neutralVariantHct.hue, neutralVariantHct.chroma);
+			const tempScheme = DynamicScheme.from({
+				sourceColorHct: neutralVariantHct,
+				variant: variant,
+				isDark: isDark,
+				contrastLevel: 0.0,
+				specVersion: specVersion
+			});
+			schemeOptions.neutralVariantPalette = tempScheme.neutralVariantPalette;
 		}
 		
 		// Use the new DynamicScheme.from() method instead of deprecated constructor
@@ -286,10 +330,11 @@ export class MaterialColorGenerator {
 	 * @param {number} seedColorArgb - Seed color in ARGB format for harmonization
 	 * @returns {Object} Tonal palettes object
 	 */
-	generateTonalPalettes(lightScheme, extendedColors = [], customCoreColors = {}, seedColorArgb) {
+	generateTonalPalettes(lightScheme, extendedColors = [], _customCoreColors = {}, seedColorArgb) {
 		const palettes = {};
 		
 		// Extract palettes from the actual scheme (variant-aware)
+		// These palettes already have proper chroma levels applied
 		const schemePalettes = {
 			primary: lightScheme.primaryPalette,
 			secondary: lightScheme.secondaryPalette,
@@ -300,17 +345,9 @@ export class MaterialColorGenerator {
 		};
 		
 		// Generate palettes for each color role using scheme palettes
+		// Scheme palettes are already generated with proper Material Design rules
 		VALID_COLOR_ROLES.forEach(role => {
-			let palette;
-			
-			// Use custom color if provided, otherwise use scheme palette
-			if (customCoreColors[role]) {
-				const customArgb = argbFromHex(customCoreColors[role]);
-				const customHct = Hct.fromInt(customArgb);
-				palette = TonalPalette.fromHueAndChroma(customHct.hue, customHct.chroma);
-			} else {
-				palette = schemePalettes[role];
-			}
+			const palette = schemePalettes[role];
 			
 			if (palette) {
 				palettes[role] = {};
