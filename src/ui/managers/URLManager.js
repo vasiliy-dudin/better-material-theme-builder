@@ -17,6 +17,7 @@ export class URLManager {
 			style: params.get('style'),
 			colorSpec: params.get('spec'),
 			preserveHue: params.get('preserveHue') === '1',
+			neutralHueFromPrimary: params.get('neutralHueFromPrimary') === '1',
 			customCoreColors: this.parseCore(params.get('core')),
 			extendedColors: this.parseExtended(params.get('extended')),
 			exportSettings: {
@@ -41,6 +42,7 @@ export class URLManager {
 			if (settings.style && settings.style !== DEFAULT_STYLE) params.set('style', settings.style);
 			if (settings.colorSpec && settings.colorSpec !== DEFAULT_SPEC) params.set('spec', settings.colorSpec);
 			if (settings.preserveHue !== DEFAULT_PRESERVE_HUE) params.set('preserveHue', settings.preserveHue ? '1' : '0');
+			if (settings.neutralHueFromPrimary) params.set('neutralHueFromPrimary', '1');
 			
 			// Core colors
 			if (settings.customCoreColors && Object.keys(settings.customCoreColors).length > 0) {

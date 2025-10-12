@@ -154,7 +154,8 @@ class MaterialColorApp {
 			
 				result = OKLCHPostProcessor.processColorScheme(result, {
 					preserveHue: true,
-					affectedPalettes: palettesToProcess
+					affectedPalettes: palettesToProcess,
+					neutralHueFromPrimary: colorSettings.neutralHueFromPrimary
 				});
 			}
 

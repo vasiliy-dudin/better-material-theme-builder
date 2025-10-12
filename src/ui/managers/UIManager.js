@@ -28,6 +28,8 @@ export class UIManager {
 	 */
 	async initialize() {
 		await this.bindEvents();
+		// Set initial visibility for conditional options
+		this.toggleNeutralHueFromPrimaryVisibility();
 	}
 
 	/**
@@ -41,6 +43,8 @@ export class UIManager {
 		this.styleChips = document.getElementById('styleChips');
 		this.specChips = document.getElementById('specChips');
 		this.preserveHueToggle = document.getElementById('preserveHueToggle');
+		this.neutralHueFromPrimaryToggle = document.getElementById('neutralHueFromPrimaryToggle');
+		this.neutralHueFromPrimaryContainer = document.getElementById('neutralHueFromPrimaryContainer');
 		
 		// Track current selections
 		this.currentStyle = DEFAULT_STYLE;
@@ -156,6 +160,13 @@ export class UIManager {
 	}
 	
 	/**
+	 * Get neutralHueFromPrimary setting
+	 */
+	getNeutralHueFromPrimary() {
+		return this.neutralHueFromPrimaryToggle?.checked ?? false;
+	}
+	
+	/**
 	 * Get all color configuration settings
 	 */
 	getColorSettings() {
@@ -164,6 +175,7 @@ export class UIManager {
 			style: this.getStyle(),
 			colorSpec: this.getColorSpec(),
 			preserveHue: this.getPreserveHue(),
+			neutralHueFromPrimary: this.getNeutralHueFromPrimary(),
 			customCoreColors: this.coreColorsManager.getCustomCoreColors()
 		};
 	}
@@ -352,8 +364,26 @@ export class UIManager {
 	bindPreserveHueToggle() {
 		if (this.preserveHueToggle) {
 			this.preserveHueToggle.addEventListener('change', () => {
+				// Show/hide the neutralHueFromPrimary option
+				this.toggleNeutralHueFromPrimaryVisibility();
 				this.onGenerate?.();
 			});
+		}
+		
+		if (this.neutralHueFromPrimaryToggle) {
+			this.neutralHueFromPrimaryToggle.addEventListener('change', () => {
+				this.onGenerate?.();
+			});
+		}
+	}
+	
+	/**
+	 * Show or hide the neutralHueFromPrimary option based on preserveHue state
+	 */
+	toggleNeutralHueFromPrimaryVisibility() {
+		if (this.neutralHueFromPrimaryContainer && this.preserveHueToggle) {
+			this.neutralHueFromPrimaryContainer.style.display = 
+				this.preserveHueToggle.checked ? 'block' : 'none';
 		}
 	}
 	
@@ -399,6 +429,10 @@ export class UIManager {
 		}
 		if (settings.preserveHue !== undefined && this.preserveHueToggle) {
 			this.preserveHueToggle.checked = settings.preserveHue;
+			this.toggleNeutralHueFromPrimaryVisibility();
+		}
+		if (settings.neutralHueFromPrimary !== undefined && this.neutralHueFromPrimaryToggle) {
+			this.neutralHueFromPrimaryToggle.checked = settings.neutralHueFromPrimary;
 		}
 
 		// Delegate to managers
@@ -416,6 +450,7 @@ export class UIManager {
 			style: this.getStyle(),
 			colorSpec: this.getColorSpec(),
 			preserveHue: this.getPreserveHue(),
+			neutralHueFromPrimary: this.getNeutralHueFromPrimary(),
 			customCoreColors: this.coreColorsManager.getCustomCoreColors(),
 			extendedColors: this.getExtendedColors(),
 			exportSettings: {

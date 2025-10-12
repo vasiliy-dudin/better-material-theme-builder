@@ -37,12 +37,14 @@ export class OKLCHPostProcessor {
 	 * @param {Object} options - Processing options
 	 * @param {boolean} options.preserveHue - Whether to preserve hue (default: true)
 	 * @param {Array<string>} options.affectedPalettes - Which palettes to process (default: ['primary', 'secondary', 'tertiary'])
+	 * @param {boolean} options.neutralHueFromPrimary - Use primary hue for neutral/neutralVariant (default: false)
 	 * @returns {Object} Processed color scheme with preserved hues
 	 */
 	static processColorScheme(colorScheme, options = {}) {
 		const {
 			preserveHue = true,
-			affectedPalettes = ['primary', 'secondary', 'tertiary']
+			affectedPalettes = ['primary', 'secondary', 'tertiary'],
+			neutralHueFromPrimary = false
 		} = options;
 
 		if (!preserveHue || !colorScheme || !colorScheme.tonalPalettes) {
@@ -51,6 +53,9 @@ export class OKLCHPostProcessor {
 
 		console.log('[OKLCH] Available palettes:', Object.keys(colorScheme.tonalPalettes));
 		console.log('[OKLCH] Processing palettes:', affectedPalettes);
+		if (neutralHueFromPrimary) {
+			console.log('[OKLCH] Using primary hue for neutral/neutralVariant');
+		}
 
 		// Deep clone the scheme to avoid mutations
 		const processedScheme = JSON.parse(JSON.stringify(colorScheme));
@@ -64,7 +69,13 @@ export class OKLCHPostProcessor {
 		// Process each affected palette
 		for (const paletteName of affectedPalettes) {
 			if (processedScheme.tonalPalettes[paletteName]) {
-				const sourceColor = sourceColors[paletteName];
+				// Use primary color as hue source for neutral/neutralVariant if option is enabled
+				let sourceColor = sourceColors[paletteName];
+				if (neutralHueFromPrimary && (paletteName === 'neutral' || paletteName === 'neutralVariant')) {
+					sourceColor = sourceColors['primary'] || sourceColor;
+					console.log(`[OKLCH] ${paletteName}: using primary hue from ${sourceColor}`);
+				}
+				
 				processedScheme.tonalPalettes[paletteName] = this.processPalette(
 					processedScheme.tonalPalettes[paletteName],
 					paletteName,

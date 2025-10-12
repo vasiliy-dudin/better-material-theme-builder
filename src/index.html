@@ -53,7 +53,7 @@
 								</div>
 								
 								<!-- Preserve Hue Option -->
-								<div class="form-check form-switch mb-4">
+								<div class="form-check form-switch mb-3">
 									<input class="form-check-input" type="checkbox" id="preserveHueToggle">
 									<label class="form-check-label" for="preserveHueToggle">
 										Prevent hue shifting
@@ -61,6 +61,13 @@
 									<div class="text-muted small mt-1">
 										Applies OKLCH post-processing
 									</div>
+								</div>
+								<!-- Neutral Hue From Primary Option (sub-option, appears only when preserveHue is enabled) -->
+								<div class="form-check form-switch mb-4" id="neutralHueFromPrimaryContainer" style="display: none;">
+									<input class="form-check-input" type="checkbox" id="neutralHueFromPrimaryToggle">
+									<label class="form-check-label" for="neutralHueFromPrimaryToggle">
+										Use primary's hue for neutrals
+									</label>
 								</div>
 								<h5 class="mt-4 mb-2">Specification</h5>
 								<div class="mb-3">
