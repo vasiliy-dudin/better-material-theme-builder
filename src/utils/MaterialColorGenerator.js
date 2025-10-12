@@ -69,7 +69,7 @@ export class MaterialColorGenerator {
 			}
 
 			// Collect source colors for each palette (for OKLCH post-processing)
-			const sourceColors = this.collectSourceColors(seedColor, customCoreColors, extendedColors);
+			const sourceColors = this.collectSourceColors(seedColor, customCoreColors, extendedColors, tonalPalettes);
 
 			return {
 				schemes: {
@@ -525,18 +525,20 @@ export class MaterialColorGenerator {
 	 * @param {string} seedColor - Seed color hex
 	 * @param {Object} customCoreColors - Custom core color overrides
 	 * @param {Array} extendedColors - Extended colors array
+	 * @param {Object} tonalPalettes - Generated tonal palettes to extract colors from
 	 * @returns {Object} Map of palette name to source color hex
 	 */
-	collectSourceColors(seedColor, customCoreColors = {}, extendedColors = []) {
+	collectSourceColors(seedColor, customCoreColors = {}, extendedColors = [], tonalPalettes = {}) {
 		const sourceColors = {};
 		
-		// Core colors: use custom if provided, otherwise seed color
-		sourceColors.primary = customCoreColors.primary || seedColor;
-		sourceColors.secondary = customCoreColors.secondary || seedColor;
-		sourceColors.tertiary = customCoreColors.tertiary || seedColor;
-		sourceColors.error = customCoreColors.error || seedColor;
-		sourceColors.neutral = customCoreColors.neutral || seedColor;
-		sourceColors.neutralVariant = customCoreColors.neutralVariant || seedColor;
+		// Core colors: use custom if provided, otherwise extract from generated palette (tone 50)
+		// This ensures we use the ACTUAL color Material Design generated, not the seed color
+		sourceColors.primary = customCoreColors.primary || (tonalPalettes.primary && tonalPalettes.primary['50']) || seedColor;
+		sourceColors.secondary = customCoreColors.secondary || (tonalPalettes.secondary && tonalPalettes.secondary['50']) || seedColor;
+		sourceColors.tertiary = customCoreColors.tertiary || (tonalPalettes.tertiary && tonalPalettes.tertiary['50']) || seedColor;
+		sourceColors.error = customCoreColors.error || (tonalPalettes.error && tonalPalettes.error['50']) || seedColor;
+		sourceColors.neutral = customCoreColors.neutral || (tonalPalettes.neutral && tonalPalettes.neutral['50']) || seedColor;
+		sourceColors.neutralVariant = customCoreColors.neutralVariant || (tonalPalettes.neutralVariant && tonalPalettes.neutralVariant['50']) || seedColor;
 		
 		// Extended colors: use their own color
 		for (const extendedColor of extendedColors) {
