@@ -229,6 +229,9 @@ export class MaterialColorGenerator {
 		colors.surfaceContainerHigh = hexFromArgb(MaterialDynamicColors.surfaceContainerHigh.getArgb(scheme));
 		colors.surfaceContainerHighest = hexFromArgb(MaterialDynamicColors.surfaceContainerHighest.getArgb(scheme));
 
+		// Surface tint (used for elevation overlays)
+		colors.surfaceTint = hexFromArgb(MaterialDynamicColors.surfaceTint.getArgb(scheme));
+
 		// Outline colors
 		colors.outline = hexFromArgb(MaterialDynamicColors.outline.getArgb(scheme));
 		colors.outlineVariant = hexFromArgb(MaterialDynamicColors.outlineVariant.getArgb(scheme));
