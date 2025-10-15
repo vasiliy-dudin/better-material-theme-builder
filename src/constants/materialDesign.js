@@ -41,6 +41,6 @@ export const STATE_LAYER_OPACITIES = {
 	disabled: 0.12
 };
 
-export const TONAL_VALUES = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 99, 100];
+export const TONAL_VALUES = [0, 5, 10, 15, 20, 25, 30, 35, 40, 50, 60, 70, 80, 90, 95, 98, 99, 100];
 
 export const VALID_COLOR_ROLES = ['primary', 'secondary', 'tertiary', 'error', 'neutral', 'neutralVariant'];
