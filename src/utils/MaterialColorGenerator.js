@@ -217,8 +217,6 @@ export class MaterialColorGenerator {
 		// Surface colors
 		colors.surface = hexFromArgb(MaterialDynamicColors.surface.getArgb(scheme));
 		colors.onSurface = hexFromArgb(MaterialDynamicColors.onSurface.getArgb(scheme));
-		colors.surfaceVariant = hexFromArgb(MaterialDynamicColors.surfaceVariant.getArgb(scheme));
-		colors.onSurfaceVariant = hexFromArgb(MaterialDynamicColors.onSurfaceVariant.getArgb(scheme));
 
 		// Additional surface colors
 		colors.surfaceDim = hexFromArgb(MaterialDynamicColors.surfaceDim.getArgb(scheme));
@@ -229,8 +227,6 @@ export class MaterialColorGenerator {
 		colors.surfaceContainerHigh = hexFromArgb(MaterialDynamicColors.surfaceContainerHigh.getArgb(scheme));
 		colors.surfaceContainerHighest = hexFromArgb(MaterialDynamicColors.surfaceContainerHighest.getArgb(scheme));
 
-		// Surface tint (used for elevation overlays)
-		colors.surfaceTint = hexFromArgb(MaterialDynamicColors.surfaceTint.getArgb(scheme));
 
 		// Outline colors
 		colors.outline = hexFromArgb(MaterialDynamicColors.outline.getArgb(scheme));
@@ -252,9 +248,7 @@ export class MaterialColorGenerator {
 		colors.onTertiaryFixed = hexFromArgb(MaterialDynamicColors.onTertiaryFixed.getArgb(scheme));
 		colors.onTertiaryFixedVariant = hexFromArgb(MaterialDynamicColors.onTertiaryFixedVariant.getArgb(scheme));
 
-		// Background and scrim
-		colors.background = hexFromArgb(MaterialDynamicColors.background.getArgb(scheme));
-		colors.onBackground = hexFromArgb(MaterialDynamicColors.onBackground.getArgb(scheme));
+		// Scrim and shadow
 		colors.scrim = hexFromArgb(MaterialDynamicColors.scrim.getArgb(scheme));
 		colors.shadow = hexFromArgb(MaterialDynamicColors.shadow.getArgb(scheme));
 
