@@ -1,0 +1,292 @@
+:host {
+	--_transparency-cell-size: var(--transparency-cell-size, 0.5em);
+	--_transparency-background: var(--transparency-background, transparent);
+	--_transparency-darkness: var(--transparency-darkness, 5%);
+	--_transparency-grid: var(
+		--transparency-grid,
+		repeating-conic-gradient(
+				transparent 0 25%,
+				rgb(0 0 0 / var(--_transparency-darkness)) 0 50%
+			)
+			0 0 / calc(2 * var(--_transparency-cell-size)) calc(2 * var(--_transparency-cell-size))
+			content-box border-box var(--_transparency-background)
+	);
+	--_dot-size: var(--dot-size, 1em);
+
+	position: relative;
+	display: inline-flex;
+	gap: 0.3em;
+	width: var(--color-swatch-width, fit-content);
+	margin: 0.3em;
+	border-radius: var(--color-swatch-radius, 0.2rem);
+}
+
+:host([size="large"]) {
+	flex-flow: column;
+	inline-size: min(11em, 100%);
+	min-block-size: 6em;
+	contain: inline-size;
+	container-name: color-swatch;
+	container-type: inline-size;
+	--_dot-size: var(--dot-size, 1.5em);
+}
+
+slot {
+	all: inherit;
+	display: contents;
+}
+
+#gamut {
+	font-size: 80%;
+
+	&:is(:host([size="large"]) *) {
+		position: absolute;
+		top: 0;
+		right: 0;
+		margin: 0.5rem;
+	}
+
+	&:not(:host([size="large"]) *) {
+		@container style(--details-style: compact) {
+			position: absolute;
+			font-size: 50%;
+			top: 0;
+			right: 0;
+			margin: 0.2rem;
+		}
+
+		&:is(.static *) {
+			align-self: baseline;
+		}
+	}
+
+	&[style*="--gamut-level: 0"] {
+		display: none;
+	}
+
+	/* Dot mode: the swatch is a bare marker, so its gamut badge is dropped
+	   (details surface in the tooltip instead). */
+	@container style(--swatch-style: dot) {
+		display: none;
+	}
+}
+
+[part="info"] {
+	margin: 0;
+	/* Hidden in the inline details view; revealed (below) as a coord grid wherever
+	   there's room to show it. */
+	display: none;
+	grid-template-columns: max-content auto;
+	gap: 0.1em 0.2em;
+	font-size: max(9px, 80%);
+	justify-content: start;
+
+	.coord {
+		display: contents;
+
+		dd {
+			margin: 0;
+			font-weight: bold;
+			font-variant-numeric: tabular-nums;
+		}
+	}
+
+	/* Show the coords when the swatch has room for them: a large swatch, or a dot —
+	   where the dot itself carries no detail, so its coords surface in the (usually
+	   compact) tooltip. */
+	&:is(:host([size="large"]) &) {
+		display: grid;
+	}
+
+	@container style(--swatch-style: dot) {
+		display: grid;
+	}
+}
+
+[part="details"] {
+	display: flex;
+	flex-flow: inherit;
+	gap: inherit;
+
+	/* Prevent flex items from overflowing */
+	min-inline-size: 0;
+
+	&.static {
+		&:is(:host([size="large"]) *) {
+			background: canvas;
+		}
+	}
+
+	&:not(:host([size="large"]) *) {
+		align-items: baseline;
+	}
+
+	@container color-swatch (width <= 5rem) {
+		font-size: 80%;
+	}
+
+	@container style(--details-style: compact) {
+		--_border-color: var(
+			--border-color,
+			color-mix(in oklab, buttonborder 20%, oklab(none none none / 0%))
+		);
+		--_pointer-height: var(--pointer-height, 0.5em);
+		--_transition-duration: var(--transition-duration, 400ms);
+		--_details-popup-width: var(--details-popup-width, max-content);
+
+		position: absolute;
+		left: 50%;
+		z-index: 2;
+		translate: -50% 0;
+		bottom: 100%;
+		margin-bottom: calc(var(--_pointer-height) * 0.8);
+		width: var(--_details-popup-width);
+		background: canvas;
+		border: 1px solid var(--_border-color);
+		padding: 0.6em 1em;
+		border-radius: 0.2rem;
+		box-shadow: 0 0.05em 1em -0.7em black;
+		transition: var(--_transition-duration);
+		transition-behavior: allow-discrete;
+		transition-property: opacity, scale, display, overlay;
+		transform-origin: 50% calc(100% + var(--_pointer-height));
+
+		&[popover] {
+			overflow: visible; /* show the triangle pointer */
+			position: fixed;
+			inset: auto;
+			margin: 0 0 calc(var(--_pointer-height) * 0.8);
+			translate: none;
+			position-anchor: --swatch;
+			position-area: top;
+			position-try-fallbacks: flip-block;
+			/* Query the active fallback so the pointer can flip with it (below). */
+			container-type: anchored;
+		}
+
+		/* Triangle pointer. Sits on the bottom edge pointing down at the swatch. */
+		&::before {
+			content: "";
+			position: absolute;
+			top: 100%;
+			left: 50%;
+			translate: -50% -50%;
+			aspect-ratio: 1;
+			height: calc(var(--_pointer-height) * sqrt(2));
+			background: inherit;
+			border: inherit;
+			rotate: -45deg;
+			clip-path: polygon(0 0, 0 100%, 100% 100%);
+		}
+
+		/* When the tooltip flips below the swatch, move the pointer to the top edge
+		   and point it up. Anchored container queries are Chrome 143+; elsewhere the
+		   pointer harmlessly stays at the bottom. */
+		@container anchored(fallback: flip-block) {
+			&::before {
+				top: 0;
+				rotate: 45deg;
+				clip-path: polygon(0 100%, 0 0, 100% 0);
+			}
+		}
+
+		/*
+		 More straightforward selector:
+		 &:not(:is(:host(:hover), :host(:focus-within), :host(:active), :host(:target), :host([open])) *)
+		 doesn't work in Safari!
+		 See https://bugs.webkit.org/show_bug.cgi?id=296577
+		*/
+		&:is(:host(:not(:hover):not(:focus-within):not(:active):not(:target):not([open])) *),
+		&:is(:host([open="false"]) *) {
+			display: none;
+			opacity: 0;
+			scale: 0;
+		}
+	}
+}
+
+[part="color"] {
+	display: flex;
+	gap: 0.2em;
+}
+
+[part="label"] {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+slot:not([name]) {
+	&::slotted(input) {
+		display: flex;
+		box-sizing: border-box;
+		min-width: 10ch;
+		font: inherit;
+	}
+
+	&:is(:host([size="large"]) *)::slotted(input) {
+		width: 100%;
+	}
+}
+
+[part="color-wrapper"],
+slot[name="swatch"]::slotted(*),
+#swatch {
+	border-radius: inherit;
+}
+
+slot[name="swatch"]::slotted(*),
+#swatch {
+	flex: 1;
+	display: flex;
+	flex-flow: column;
+	align-items: center;
+	justify-content: center;
+	padding: 0.5em;
+	display: flex;
+	flex-flow: column;
+	flex: 1;
+	background: linear-gradient(var(--color) 0 100%), var(--_transparency-grid);
+
+	/* In compact mode the swatch is the anchor for its details popover. */
+	@container style(--details-style: compact) {
+		anchor-name: --swatch;
+	}
+
+	&:where(:host([size="large"]) *) {
+		min-block-size: 3em;
+	}
+
+	&:where(:not(:host([size="large"]) *)) {
+		display: flex;
+		min-inline-size: 2em;
+		min-block-size: 1em;
+		font-size: 65%;
+		flex: 1;
+	}
+
+	@container style(--swatch-style: dot) {
+		font-size: 1rem;
+		margin: 0;
+		/* A fixed circle, not a flex-stretched box (otherwise it elongates). */
+		flex: none;
+		inline-size: var(--_dot-size);
+		min-inline-size: 0;
+		min-block-size: 0;
+		aspect-ratio: 1;
+		overflow: hidden;
+		border-radius: 50%;
+		border: var(--dot-border, clamp(2px, 0.3em, var(--_dot-size) / 10) solid white);
+		box-shadow: var(
+			--dot-shadow,
+			0 0.04em 0.1em rgb(0 0 0 / 16%),
+			0 0.12em 0.3em -0.04em rgb(0 0 0 / 22%)
+		);
+	}
+}
+
+slot[name="swatch-content"] {
+	/* See https://lea.verou.me/blog/2024/contrast-color/ */
+	--l: clamp(0, (var(--l-threshold, 0.7) / l - 1) * infinity, 1);
+	color: oklch(from var(--color) var(--l) 0 h);
+}
