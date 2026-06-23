@@ -1,11 +1,28 @@
+import 'color-elements/color-picker';
+import Color from 'colorjs.io';
+
+// Statically import the widget's CSS instead of relying on its internal
+// `import(url, { with: { type: "css" } })` calls, which 404 against the
+// build's hashed asset paths at runtime and fall back to an unreliable path.
+// This list mirrors color-picker's own transitive imports inside the package
+// (color-picker -> channel-slider, color-swatch, space-picker;
+// channel-slider -> color-slider; color-swatch -> gamut-badge) - recheck
+// against node_modules/color-elements/src/color-picker/color-picker.js if
+// upgrading color-elements and a sub-widget's styling goes missing.
+import 'color-elements/color-picker.css';
+import 'color-elements/channel-slider.css';
+import 'color-elements/color-swatch.css';
+import 'color-elements/space-picker.css';
+import 'color-elements/gamut-badge.css';
+import 'color-elements/color-slider.css';
+
 /**
  * Manager for color picker functionality
  * Handles all color picker setup, events, and UI updates
  */
 export class ColorPickerManager {
 	constructor() {
-		// Import Color from color-picker's context
-		this.Color = window.Color || globalThis.Color;
+		this.Color = Color;
 	}
 	/**
 	 * Setup a color picker with all necessary event bindings
@@ -64,15 +81,9 @@ export class ColorPickerManager {
 	 */
 	setColorPickerColor(colorPicker, colorPreview, colorInput, color) {
 		try {
-			// Create Color object if we have the Color class
-			if (this.Color) {
-				colorPicker.color = new this.Color(color);
-			} else {
-				// Fallback: try to set as string
-				colorPicker.setAttribute('color', color);
-			}
+			colorPicker.color = new this.Color(color);
 		} catch (_error) {
-			// Final fallback: set as attribute
+			// Fallback: set as attribute if the value can't be parsed into a Color
 			colorPicker.setAttribute('color', color);
 		}
 		
@@ -120,15 +131,9 @@ export class ColorPickerManager {
 			const color = e.target.value;
 			if (this.isValidHexColor(color)) {
 				try {
-					// Create Color object if we have the Color class
-					if (this.Color) {
-						colorPicker.color = new this.Color(color);
-					} else {
-						// Fallback: try to set as string
-						colorPicker.setAttribute('color', color);
-					}
+					colorPicker.color = new this.Color(color);
 				} catch (_error) {
-					// Final fallback: set as attribute
+					// Fallback: set as attribute if the value can't be parsed into a Color
 					colorPicker.setAttribute('color', color);
 				}
 				

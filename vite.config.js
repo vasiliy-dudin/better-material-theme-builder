@@ -10,6 +10,9 @@ export default defineConfig({
   build: {
     outDir: '../dist',
     emptyOutDir: true,
+    // lightningcss (Vite's default CSS minifier) can't yet parse the
+    // bleeding-edge @container anchored() syntax used by color-elements' CSS
+    cssMinify: 'esbuild',
     rollupOptions: {
       input: {
         main: './src/index.html'
